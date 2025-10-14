@@ -1,0 +1,36 @@
+# .NET build outputs
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# NuGet packages
+packages/
+*.nupkg
+
+# Local uploads
+wwwroot/uploads/
+
+# Secrets and sensitive files
+appsettings.json
+appsettings.*.secrets.json
+appsettings.Local.json
+*.pfx
+*.p12
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

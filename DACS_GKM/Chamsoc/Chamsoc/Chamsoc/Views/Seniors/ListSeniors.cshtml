@@ -1,0 +1,904 @@
+﻿@model List<Chamsoc.Models.Senior>
+@using System.Globalization
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<link rel="stylesheet" href="~/css/call.css">
+
+@{
+    ViewData["Title"] = "Danh Sách Người Cần Chăm Sóc";
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+    var currentUserName = User.Identity.Name ?? "Người dùng không xác định";
+}
+
+<style>
+    .card {
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-body {
+        flex: 1;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    .verified-tick {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: url('/images/tick.png') no-repeat center center;
+        background-size: cover;
+        margin-left: 5px;
+        vertical-align: middle;
+        position: relative;
+    }
+
+    .verified-tick::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border: 2px solid transparent;
+        border-radius: 50%;
+        animation: rainbow-border 3s linear infinite;
+    }
+
+    @@keyframes rainbow-border {
+        0% { border-color: #ff0000; }
+        16% { border-color: #ff7f00; }
+        33% { border-color: #ffff00; }
+        50% { border-color: #00ff00; }
+        66% { border-color: #00ffff; }
+        83% { border-color: #0000ff; }
+        100% { border-color: #ff00ff; }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .call-popup, .active-call-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        display: none;
+        width: 400px;
+        max-width: 90vw;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .call-popup .popup-content, .active-call-popup .popup-content {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .call-popup .avatar, .active-call-popup .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 1.5rem;
+        border: 3px solid #fff;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .call-popup h4, .active-call-popup h4 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .call-popup .call-status, .active-call-popup .call-status {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .call-popup .popup-buttons, .active-call-popup .popup-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .call-popup .popup-buttons button, .active-call-popup .popup-buttons button {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .call-popup .popup-buttons button:hover, .active-call-popup .popup-buttons button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .call-popup .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .call-popup .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .active-call-popup .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .active-call-popup .btn-secondary.muted {
+        background-color: #495057;
+    }
+
+    .call-timer {
+        font-size: 1.2rem;
+        color: #666;
+        margin-top: 1rem;
+        font-weight: 500;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        transition: color 0.3s ease;
+        z-index: 1;
+    }
+
+    .close-btn:hover {
+        color: #333;
+    }
+
+    .call-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        z-index: 999;
+        display: none;
+    }
+
+    @@keyframes shake {
+        0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+        25% { transform: translate(-50%, -50%) translateX(-5px); }
+        75% { transform: translate(-50%, -50%) translateX(5px); }
+    }
+
+    .call-popup.shake {
+        animation: shake 0.5s ease-in-out infinite;
+    }
+
+    /* Call button styles */
+    .call-button {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .call-button.end {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .call-button.mute {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .call-button.speaker {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .call-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .call-button i {
+        font-size: 1.5rem;
+    }
+
+    .call-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        display: none;
+        width: 360px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        animation: pulse 2s infinite;
+    }
+
+    #callName {
+        font-size: 1.5rem;
+        color: #333;
+        margin: 1rem 0;
+        font-weight: 600;
+    }
+
+    .call-status {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .call-timer {
+        font-size: 1.2rem;
+        color: #2196F3;
+        font-weight: 500;
+        margin: 1rem 0;
+    }
+
+    .popup-buttons {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .popup-buttons button {
+        transition: all 0.3s ease;
+    }
+
+    .popup-buttons button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Danh Sách Người Cần Chăm Sóc</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <!-- Search Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="ListSeniors" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Tìm kiếm theo nhu cầu</label>
+                    <select name="searchCareNeeds" class="form-select">
+                        <option value="">Tất cả nhu cầu</option>
+                        @foreach (var need in ViewBag.CareNeeds ?? new List<string>())
+                        {
+                            <option value="@need" selected="@(ViewBag.SearchCareNeeds == need)">@need</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Giá tối thiểu</label>
+                    <select name="minPrice" class="form-select">
+                        <option value="">Không giới hạn</option>
+                        <option value="100000" selected="@(ViewBag.MinPrice == 100000)">100,000 VNĐ</option>
+                        <option value="500000" selected="@(ViewBag.MinPrice == 500000)">500,000 VNĐ</option>
+                        <option value="1000000" selected="@(ViewBag.MinPrice == 1000000)">1,000,000 VNĐ</option>
+                        <option value="2000000" selected="@(ViewBag.MinPrice == 2000000)">2,000,000 VNĐ</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Giá tối đa</label>
+                    <select name="maxPrice" class="form-select">
+                        <option value="">Không giới hạn</option>
+                        <option value="1000000" selected="@(ViewBag.MaxPrice == 1000000)">1,000,000 VNĐ</option>
+                        <option value="2000000" selected="@(ViewBag.MaxPrice == 2000000)">2,000,000 VNĐ</option>
+                        <option value="5000000" selected="@(ViewBag.MaxPrice == 5000000)">5,000,000 VNĐ</option>
+                        <option value="10000000" selected="@(ViewBag.MaxPrice == 10000000)">10,000,000 VNĐ</option>
+                    </select>
+                </div>
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Tìm kiếm
+                    </button>
+                    <a asp-action="ListSeniors" class="btn btn-secondary">
+                        <i class="fas fa-redo me-2"></i>Đặt lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="row">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center">
+                <p class="text-muted">Không tìm thấy người cần chăm sóc nào phù hợp với tiêu chí tìm kiếm.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var senior in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <img src="@(string.IsNullOrEmpty(senior.AvatarUrl) ? 
+                                    $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(senior.Name)}&background=random&size=200" : 
+                                    senior.AvatarUrl)" 
+                                     alt="Avatar" class="rounded-circle" 
+                                     style="width: 100px; height: 100px; object-fit: cover;" />
+                            </div>
+                            <h5 class="card-title text-center mb-3">@senior.Name</h5>
+                            <div class="info-list">
+                                <p class="mb-2">
+                                    <i class="fas fa-user-clock me-2 text-primary"></i>
+                                    <strong>Tuổi:</strong> @senior.Age
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-notes-medical me-2 text-primary"></i>
+                                    <strong>Nhu cầu:</strong> @senior.CareNeeds
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-money-bill-wave me-2 text-primary"></i>
+                                    <strong>Giá mong muốn:</strong> @senior.Price.ToString("N0") VNĐ
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-calendar-check me-2 text-primary"></i>
+                                    <strong>Ngày đăng ký:</strong> @senior.RegistrationDate.ToString("dd/MM/yyyy")
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-check-circle me-2 text-primary"></i>
+                                    <strong>Trạng thái:</strong>
+                                    @if (senior.Status)
+                                    {
+                                        <span class="badge bg-success">Sẵn sàng</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Đang bận</span>
+                                    }
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-shield-alt me-2 text-primary"></i>
+                                    <strong>Xác minh:</strong>
+                                    @if (senior.IsVerified)
+                                    {
+                                        <span class="badge bg-success">Đã xác minh</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Chưa xác minh</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 text-center">
+                            @if (senior.Status && senior.IsVerified)
+                            {
+                                <button class="btn btn-primary start-audio-call" 
+                                        data-userid="@senior.UserId"
+                                        data-username="@senior.Name"
+                                        data-avatar="@(string.IsNullOrEmpty(senior.AvatarUrl) ? "/images/default-avatar.png" : senior.AvatarUrl)">
+                                    <i class="fas fa-phone me-2"></i>Gọi điện
+                                </button>
+                                <a asp-action="BookSenior" asp-route-seniorId="@senior.Id" 
+                                   class="btn btn-success">
+                                    <i class="fas fa-calendar-plus me-2"></i>Đặt lịch
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary" disabled>
+                                    <i class="fas fa-phone me-2"></i>Không khả dụng
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Call Overlay -->
+<div class="call-overlay" id="callOverlay"></div>
+
+<!-- Call Popup -->
+<div class="call-popup" id="callPopup">
+    <div class="popup-content">
+        <img id="callAvatar" class="avatar" src="" alt="Avatar">
+        <h4 id="callName" class="mt-3">Đang gọi...</h4>
+        <p id="callStatus" class="call-status">Đang kết nối...</p>
+        <div id="callTimer" class="call-timer">00:00</div>
+        
+        <div class="popup-buttons" id="incomingCallButtons">
+            <button class="btn btn-success btn-lg rounded-circle d-inline-flex align-items-center justify-content-center" id="acceptCallBtn" title="Chấp nhận cuộc gọi" style="width: 60px; height: 60px;">
+                <i class="bi bi-telephone-inbound-fill fs-4"></i>
+            </button>
+            <button class="btn btn-danger btn-lg rounded-circle d-inline-flex align-items-center justify-content-center" id="rejectCallBtn" title="Từ chối cuộc gọi" style="width: 60px; height: 60px;">
+                <i class="bi bi-telephone-x-fill fs-4"></i>
+            </button>
+        </div>
+
+        <div class="popup-buttons" id="activeCallButtons">
+            <button class="btn btn-secondary btn-lg rounded-circle d-inline-flex align-items-center justify-content-center" id="toggleMicBtn" title="Tắt/Bật micro" style="width: 60px; height: 60px;">
+                <i class="bi bi-mic-fill fs-4"></i>
+            </button>
+            <button class="btn btn-info btn-lg rounded-circle d-inline-flex align-items-center justify-content-center" id="toggleSpeakerBtn" title="Tắt/Bật loa" style="width: 60px; height: 60px;">
+                <i class="bi bi-volume-up-fill fs-4"></i>
+            </button>
+            <button class="btn btn-danger btn-lg rounded-circle d-inline-flex align-items-center justify-content-center" id="endActiveCallBtn" title="Kết thúc cuộc gọi" style="width: 60px; height: 60px;">
+                <i class="bi bi-telephone-x-fill fs-4"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Audio elements -->
+<audio id="remoteAudio" autoplay></audio>
+<audio id="ringingAudio" loop>
+    <source src="/audio/ringing.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/phone/telephone-ring-01.mp3" type="audio/mpeg">
+</audio>
+<audio id="endCallAudio">
+    <source src="/audio/endcall.mp3" type="audio/mpeg">
+    <source src="https://www.soundjay.com/phone/telephone-end-01.mp3" type="audio/mpeg">
+</audio>
+
+@section Scripts {
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        // Khởi tạo các biến
+        let callTimer = null;
+        let callStartTime = null;
+        let isMuted = false;
+        let localStream = null;
+        let peerConnection = null;
+        let isCallActive = false;
+        let targetUserId = null;
+        let targetUserName = null;
+        let targetAvatar = null;
+        let currentUserName = '@User.Identity.Name';
+        let currentUserAvatar = '@(User.FindFirst("AvatarUrl")?.Value ?? "https://ui-avatars.com/api/?name=" + User.Identity.Name + "&background=random")';
+        let connection = null;
+
+        const config = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun1.l.google.com:19302" },
+                { urls: "stun:stun2.l.google.com:19302" },
+                { urls: "stun:stun3.l.google.com:19302" },
+                {
+                    urls: ["turn:openrelay.metered.ca:80", "turn:openrelay.metered.ca:443"],
+                    username: "openrelayproject",
+                    credential: "openrelayproject"
+                }
+            ],
+            iceCandidatePoolSize: 10
+        };
+
+        const audioConstraints = {
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            }
+        };
+
+        // Khởi tạo kết nối SignalR
+        async function initializeSignalR() {
+            try {
+                console.log("Initializing SignalR connection...");
+                connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/callHub")
+                    .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
+                    .build();
+
+                // Xử lý sự kiện kết nối
+                connection.on("ReceiveAnswer", async (answer) => {
+                    try {
+                        console.log("Received answer");
+                        if (peerConnection && peerConnection.signalingState !== "closed") {
+                            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                            stopAudio('ringingAudio');
+                            showActiveCall();
+                            startCallTimer();
+                        }
+                    } catch (error) {
+                        console.error("Error handling answer:", error);
+                        showError("Không thể xử lý câu trả lời");
+                        endCall();
+                    }
+                });
+
+                // Xử lý sự kiện kết nối đóng
+                connection.on("CallEnded", () => {
+                    console.log("Call ended");
+                    endCall();
+                });
+
+                // Thêm xử lý sự kiện kết nối bị đóng
+                connection.onclose(async () => {
+                    console.log("Connection closed");
+                    endCall();
+                    // Thử kết nối lại sau 5 giây
+                    setTimeout(initializeSignalR, 5000);
+                });
+
+                // Thêm xử lý sự kiện lỗi kết nối
+                connection.onreconnecting((error) => {
+                    console.log("Reconnecting to SignalR...", error);
+                    showError("Đang kết nối lại...");
+                });
+
+                connection.onreconnected((connectionId) => {
+                    console.log("Reconnected to SignalR");
+                    showError("Đã kết nối lại");
+                });
+
+                await connection.start();
+                console.log("SignalR Connected to callHub successfully.");
+                updateCallStatus("Đã kết nối");
+
+            } catch (err) {
+                console.error("SignalR Connection Error:", err);
+                showError("Không thể kết nối đến máy chủ");
+                setTimeout(initializeSignalR, 5000);
+            }
+        }
+
+        // Khởi tạo kết nối khi trang được tải
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSignalR();
+        });
+
+        // Hàm bắt đầu cuộc gọi
+        async function startCall(userId, userName, userAvatar) {
+            try {
+                if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                    throw new Error("Không có kết nối đến máy chủ");
+                }
+
+                console.log("Starting call to:", userId, userName);
+                targetUserId = userId;
+                targetUserName = userName;
+                targetAvatar = userAvatar || '/images/default-avatar.png';
+
+                // Khởi tạo kết nối WebRTC
+                if (peerConnection) {
+                    peerConnection.close();
+                }
+                peerConnection = new RTCPeerConnection(config);
+                setupPeerConnection(userId);
+
+                // Lấy stream âm thanh
+                localStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                // Tạo và gửi offer
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                await connection.invoke("CallUser", userId, currentUserName, currentUserAvatar, offer);
+
+                // Hiển thị popup cuộc gọi
+                showActiveCall();
+                playAudio('ringingAudio');
+                startCallTimer();
+
+            } catch (error) {
+                console.error("Error starting call:", error);
+                showError("Không thể bắt đầu cuộc gọi");
+                endCall();
+            }
+        }
+
+        // Hàm kết thúc cuộc gọi
+        function endCall() {
+            console.log("Ending call...");
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            stopCallTimer();
+            isCallActive = false;
+            
+            const callPopup = document.getElementById('callPopup');
+            const callOverlay = document.getElementById('callOverlay');
+            if (callPopup) callPopup.style.display = 'none';
+            if (callOverlay) callOverlay.style.display = 'none';
+            
+            // Dừng tất cả âm thanh
+            stopAudio('ringingAudio');
+            stopAudio('endCallAudio');
+            
+            // Phát âm thanh kết thúc
+            playAudio('endCallAudio');
+
+            if (targetUserId && connection && connection.state === signalR.HubConnectionState.Connected) {
+                connection.invoke("EndCall", targetUserId).catch(error => {
+                    console.error("Error ending call:", error);
+                });
+            }
+
+            // Reset các biến
+            targetUserId = null;
+            targetUserName = null;
+            targetAvatar = null;
+        }
+
+        // Hàm cập nhật trạng thái cuộc gọi
+        function updateCallStatus(status) {
+            const statusElement = document.getElementById('callStatus');
+            if (statusElement) {
+                statusElement.textContent = status;
+            }
+        }
+
+        // Hàm dừng âm thanh
+        function stopAudio(audioId) {
+            const audio = document.getElementById(audioId);
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.src = ''; // Reset source
+                audio.load(); // Reload audio element
+            }
+        }
+
+        // Hàm phát âm thanh
+        function playAudio(audioId) {
+            const audio = document.getElementById(audioId);
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(err => {
+                    console.error(`Error playing ${audioId}:`, err);
+                    // Nếu lỗi do user interaction, thêm event listener
+                    if (err.name === 'NotAllowedError') {
+                        const playOnInteraction = () => {
+                            audio.play().catch(console.error);
+                            document.removeEventListener('click', playOnInteraction);
+                        };
+                        document.addEventListener('click', playOnInteraction);
+                    }
+                });
+            }
+        }
+
+        // Thêm sự kiện cho nút gọi điện
+        document.querySelectorAll('.start-audio-call').forEach(button => {
+            button.addEventListener('click', async function() {
+                const userId = this.dataset.userid;
+                const userName = this.dataset.username;
+                const userAvatar = this.dataset.avatar;
+                
+                await startCall(userId, userName, userAvatar);
+            });
+        });
+
+        function setupPeerConnection(targetUserId) {
+            peerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    connection.invoke("SendIceCandidate", targetUserId, event.candidate)
+                        .catch(error => {
+                            console.error("Error sending ICE candidate:", error);
+                        });
+                }
+            };
+
+            peerConnection.ontrack = event => {
+                console.log("Received remote track");
+                const remoteAudio = document.getElementById("remoteAudio");
+                if (remoteAudio && event.streams[0]) {
+                    remoteAudio.srcObject = event.streams[0];
+                }
+            };
+
+            peerConnection.oniceconnectionstatechange = () => {
+                console.log("ICE connection state:", peerConnection.iceConnectionState);
+                if (peerConnection.iceConnectionState === "failed") {
+                    console.error("ICE connection failed");
+                    endCall();
+                }
+            };
+        }
+
+        function showIncomingCall(userName) {
+            const callPopup = document.getElementById('callPopup');
+            const callOverlay = document.getElementById('callOverlay');
+            const incomingCallButtons = document.getElementById('incomingCallButtons');
+            const activeCallButtons = document.getElementById('activeCallButtons');
+            const callTimer = document.getElementById('callTimer');
+            const callStatus = document.getElementById('callStatus');
+            const callAvatar = document.getElementById('callAvatar');
+            const callName = document.getElementById('callName');
+
+            // Sử dụng ui-avatars.com API
+            callAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&size=120`;
+            callName.textContent = userName || 'Không xác định';
+            callStatus.textContent = 'Cuộc gọi đến...';
+            
+            incomingCallButtons.style.display = 'flex';
+            activeCallButtons.style.display = 'none';
+            callTimer.style.display = 'none';
+            
+            callPopup.style.display = 'block';
+            callOverlay.style.display = 'block';
+
+            // Thêm sự kiện cho các nút
+            document.getElementById('acceptCallBtn').onclick = acceptCall;
+            document.getElementById('rejectCallBtn').onclick = rejectCall;
+        }
+
+        function showActiveCall() {
+            const callPopup = document.getElementById('callPopup');
+            const callOverlay = document.getElementById('callOverlay');
+            const incomingCallButtons = document.getElementById('incomingCallButtons');
+            const activeCallButtons = document.getElementById('activeCallButtons');
+            const callTimer = document.getElementById('callTimer');
+            const callStatus = document.getElementById('callStatus');
+            const callAvatar = document.getElementById('callAvatar');
+            const callName = document.getElementById('callName');
+
+            // Sử dụng ui-avatars.com API
+            callAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(targetUserName)}&background=random&size=120`;
+            callName.textContent = targetUserName || 'Không xác định';
+
+            incomingCallButtons.style.display = 'none';
+            activeCallButtons.style.display = 'flex';
+            callTimer.style.display = 'block';
+            callStatus.textContent = 'Đang gọi...';
+            
+            callPopup.style.display = 'block';
+            callOverlay.style.display = 'block';
+
+            // Thêm sự kiện cho các nút điều khiển
+            const toggleMicBtn = document.getElementById('toggleMicBtn');
+            const toggleSpeakerBtn = document.getElementById('toggleSpeakerBtn');
+            const endActiveCallBtn = document.getElementById('endActiveCallBtn');
+
+            if (toggleMicBtn && toggleSpeakerBtn && endActiveCallBtn) {
+                toggleMicBtn.onclick = toggleMute;
+                toggleSpeakerBtn.onclick = toggleSpeaker;
+                endActiveCallBtn.onclick = endCall;
+            }
+        }
+
+        function toggleMute() {
+            if (localStream) {
+                const audioTracks = localStream.getAudioTracks();
+                if (audioTracks.length > 0) {
+                    const isMuted = !audioTracks[0].enabled;
+                    audioTracks.forEach(track => {
+                        track.enabled = !isMuted;
+                    });
+                    const muteIcon = document.getElementById('toggleMicBtn').querySelector('i');
+                    muteIcon.className = isMuted ? 'bi bi-mic-mute-fill' : 'bi bi-mic-fill';
+                    
+                    // Gửi trạng thái mic cho bên kia
+                    if (connection && targetUserId) {
+                        connection.invoke("SendMicState", targetUserId, !isMuted)
+                            .catch(error => console.error("Error sending mic state:", error));
+                    }
+                }
+            }
+        }
+
+        function toggleSpeaker() {
+            const speakerIcon = document.getElementById('toggleSpeakerBtn').querySelector('i');
+            const isMuted = speakerIcon.className.includes('mute');
+            speakerIcon.className = isMuted ? 'bi bi-volume-up-fill' : 'bi bi-volume-mute-fill';
+            const remoteAudio = document.getElementById('remoteAudio');
+            if (remoteAudio) {
+                remoteAudio.muted = !isMuted;
+            }
+        }
+
+        function startCallTimer() {
+            callStartTime = new Date();
+            callTimer = setInterval(updateCallTimer, 1000);
+        }
+
+        function stopCallTimer() {
+            if (callTimer) {
+                clearInterval(callTimer);
+                callTimer = null;
+            }
+        }
+
+        function updateCallTimer() {
+            const now = new Date();
+            const diff = Math.floor((now - callStartTime) / 1000);
+            const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+            const seconds = (diff % 60).toString().padStart(2, '0');
+            document.getElementById('callTimer').textContent = `${minutes}:${seconds}`;
+        }
+
+        function showError(message) {
+            console.error(message);
+            const callStatus = document.getElementById('callStatus');
+            if (callStatus) {
+                callStatus.textContent = message;
+                callStatus.style.color = '#dc3545';
+            }
+        }
+
+        // Add mic state handling
+        connection.on("ReceiveMicState", (isEnabled) => {
+            const muteIcon = document.getElementById('toggleMicBtn').querySelector('i');
+            if (muteIcon) {
+                muteIcon.className = isEnabled ? 'bi bi-mic-fill' : 'bi bi-mic-mute-fill';
+            }
+        });
+    </script>
+}
