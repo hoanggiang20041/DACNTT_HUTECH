@@ -25,6 +25,26 @@ namespace Chamsoc.Data
         {
             base.OnModelCreating(builder);
 
+            // Standardize table names (plural snake_case)
+            builder.Entity<Caregiver>().ToTable("caregivers");
+            builder.Entity<Senior>().ToTable("seniors");
+            builder.Entity<CareJob>().ToTable("care_jobs");
+            builder.Entity<Complaint>().ToTable("complaints");
+            builder.Entity<Notification>().ToTable("notifications");
+            builder.Entity<Payment>().ToTable("payments");
+            builder.Entity<Rating>().ToTable("ratings");
+            builder.Entity<Service>().ToTable("services");
+            builder.Entity<Transaction>().ToTable("transactions");
+
+            // Professional Identity table names
+            builder.Entity<ApplicationUser>().ToTable("users");
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityRole>().ToTable("roles");
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<string>>().ToTable("user_roles");
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserClaim<string>>().ToTable("user_claims");
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserLogin<string>>().ToTable("user_logins");
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>>().ToTable("role_claims");
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<string>>().ToTable("user_tokens");
+
             // Configure relationships
             builder.Entity<CareJob>()
                 .HasOne(j => j.Senior)
