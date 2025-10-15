@@ -33,14 +33,14 @@ namespace Chamsoc.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public DateTime? ApprovedAt { get; set; }
-        public string ApprovedBy { get; set; }
+        public string? ApprovedBy { get; set; }
 
         public DateTime? RejectedAt { get; set; }
-        public string RejectedBy { get; set; }
-        public string RejectionReason { get; set; }
+        public string? RejectedBy { get; set; }
+        public string? RejectionReason { get; set; }
 
-        public string PaymentMethod { get; set; } // BankTransfer, Cash, etc.
-        public string TransactionId { get; set; } // ID giao dịch từ ngân hàng hoặc bên thứ 3
-        public string Notes { get; set; }
+        public string? PaymentMethod { get; set; } // BankTransfer, Cash, etc.
+        public string? TransactionId { get; set; } // ID giao dịch từ ngân hàng hoặc bên thứ 3
+        public string? Notes { get; set; }
     }
 } 

@@ -4,7 +4,7 @@ namespace Chamsoc.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        public string RoleId { get; set; }
+        public string? RoleId { get; set; }
         public string FullName { get; set; }
         public string Address { get; set; }
         public DateTime DateOfBirth { get; set; }

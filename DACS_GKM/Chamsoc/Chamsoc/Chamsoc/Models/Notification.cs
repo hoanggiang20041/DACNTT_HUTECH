@@ -27,8 +27,6 @@ namespace Chamsoc.Models
         public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
 
-        public int? CareJobId { get; set; }
-
         [ForeignKey("JobId")]
         public CareJob? Job { get; set; }
     }
