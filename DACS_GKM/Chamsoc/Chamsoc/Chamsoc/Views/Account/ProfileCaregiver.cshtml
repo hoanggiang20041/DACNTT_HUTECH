@@ -57,6 +57,7 @@
                                 <h4 class="text-primary mb-4">@Model.Name</h4>
                                 <div class="row mb-3">
                                     <div class="col-md-6">
+                                        <p><i class="fas fa-venus-mars me-2"></i><strong>Giới tính:</strong> @ViewBag.User.Gender</p>
                                         <p><i class="fas fa-briefcase me-2"></i><strong>Kỹ năng:</strong></p>
                                         <div class="ms-4">
                                             @foreach (var skill in Model.Skills.Split(','))
