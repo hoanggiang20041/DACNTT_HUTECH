@@ -22,6 +22,7 @@
             opacity: 0;
             animation: fadeIn 1.5s ease-in-out forwards;
             margin-bottom: 2rem;
+            margin-top: 20px; /* Khoảng cách cho navbar cố định (giảm từ 30px) */
         }
 
         .banner img {
@@ -44,7 +45,7 @@
         }
 
         .banner-text h1 {
-            font-size: 3rem;
+            font-size: 2.1rem;
             font-weight: bold;
             color: white;
             text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
@@ -97,22 +98,28 @@
         .navbar {
             background-color: #ffffff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem 0;
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
         }
 
         .navbar-brand {
-            font-size: 1.3rem;
+            font-size: 1 rem;
             font-weight: bold;
             color: #007bff;
-            padding: 0.3rem 0;
+            padding: 0;
         }
 
         .nav-link {
             color: #333;
-            font-weight: 500;
-            padding: 0.3rem 0.8rem;
+            font-weight: 700;
+            padding: 0;
             transition: color 0.3s ease;
-            font-size: 0.95rem;
+            font-size: 0.9 rem;
         }
 
             .nav-link:hover {
@@ -164,12 +171,16 @@
                 color: #f8f9fa;
             }
 
-        /* Bong bóng chat Zalo */
-        .zalo-chat-btn {
+        /* Mini Chat Widget */
+        .mini-chat-widget {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: #0068ff;
+            z-index: 9998;
+        }
+
+        .mini-chat-toggle {
+            background-color: #007bff;
             color: white;
             width: 60px;
             height: 60px;
@@ -177,59 +188,166 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 9998;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             cursor: move;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            font-size: 24px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
-        .zalo-chat-btn:hover {
+        .mini-chat-toggle:hover {
             transform: scale(1.1);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .zalo-chat-btn img {
-            width: 45px;
-            height: 45px;
+        .mini-chat-toggle:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
+        }
+
+        .mini-chat-toggle.active {
+            background-color: #0056b3;
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
+        }
+
+        .mini-chat-toggle.active i {
+            transform: rotate(-45deg);
+            transition: transform 0.3s ease;
+        }
+
+        .mini-chat-options {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 10px;
+            min-width: 120px;
+            animation: slideUp 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        .mini-chat-options.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .chat-option {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+            transform: translateX(-10px);
+            opacity: 0;
+        }
+
+        .chat-option.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .chat-option:nth-child(1).show {
+            transition-delay: 0.1s;
+        }
+
+        .chat-option:nth-child(2).show {
+            transition-delay: 0.2s;
+        }
+
+        .chat-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .chat-option:hover {
+            background-color: #f8f9fa;
+        }
+
+        .chat-option i {
+            font-size: 18px;
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .chat-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
             border-radius: 50%;
-            pointer-events: none; /* Ngăn chặn sự kiện chuột trên ảnh */
+        }
+
+        .chat-option span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        #zaloOption i {
+            color: #0068ff;
+        }
+
+        #chatbotOption i {
+            color: #007bff;
+        }
+
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .footer {
             background-color: #1a252f;
             color: white;
-            padding: 10px 0;
+            padding: 4px 0;
             width: 100%;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
             border-top: 1px solid #ff6200;
             margin-top: auto;
-            position: relative;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
         }
 
             .footer h5 {
                 color: #ff6200;
                 font-weight: bold;
-                margin-bottom: 0.5rem;
+                margin-bottom: 0.1rem;
                 font-size: 0.9rem;
                 position: relative;
-                padding-bottom: 3px;
+                padding-bottom: 1px;
             }
 
             .footer p {
                 font-size: 0.8rem;
-                margin-bottom: 0.3rem;
-                line-height: 1.2;
+                margin-bottom: 0.1rem;
+                line-height: 1.0;
             }
 
             .footer hr {
-                margin: 5px 0;
+                margin: 1px 0;
                 border-color: #ffffff30;
             }
 
             .footer .text-center {
-                padding-top: 5px;
-                font-size: 0.8rem;
+                padding-top: 1px;
+                font-size: 0.7rem;
             }
 
         .footer .row {
@@ -241,7 +359,7 @@
         }
 
         .login-btn {
-            background-color: #007bff;
+            background-color: #ff0000;
             color: white;
             padding: 0.3rem 1rem;
             border-radius: 20px;
@@ -292,6 +410,7 @@
             padding-top: 2rem;
             padding-bottom: 2rem;
             flex: 1;
+            margin-bottom: 10px; /* Khoảng cách cho footer cố định (giảm từ 80px) */
         }
 
         main {
@@ -314,30 +433,6 @@
             background-color: #ffc107 !important;
         }
 
-        /* Bong bóng chatbot */
-        .chatbot-toggle-btn {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            background-color: #000000;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9998;
-            cursor: move;
-            font-size: 24px;
-            bottom: 20px;
-            right: 90px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .chatbot-toggle-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
 
         #chatbot-container {
             position: fixed;
@@ -429,7 +524,7 @@
 
         /* Điều chỉnh vị trí của các nút chat */
         .footer .container {
-            padding-top: 5px;
+            padding-top: 2px;
             padding-bottom: 5px;
         }
 
@@ -463,6 +558,64 @@
         .dropdown-toggle::after {
             margin-left: 0.3rem;
             vertical-align: middle;
+        }
+
+        /* Responsive cho mobile */
+        @@media (max-width: 768px) {
+            .mini-chat-widget {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 9998;
+            }
+
+            .mini-chat-toggle {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mini-chat-options {
+                right: 0;
+                bottom: 70px;
+                min-width: 140px;
+            }
+
+            .chat-option {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .chat-option i {
+                font-size: 20px;
+            }
+
+            .chat-icon {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .mini-chat-widget {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .mini-chat-toggle {
+                width: 55px;
+                height: 55px;
+                font-size: 22px;
+            }
+
+            .mini-chat-options {
+                bottom: 65px;
+                right: 0;
+                min-width: 130px;
+            }
         }
     </style>
 </head>
@@ -863,7 +1016,7 @@
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="navbar-text me-3">
-                        Hotline: <a href="tel:0522336052" style="color: #007bff; font-weight: bold;">0522.336.052</a>
+                        Hotline: <a href="tel:0522336052" style="color:rgb(2, 5, 9); font-weight: bold;">0522.336.052</a>
                     </span>
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -922,7 +1075,7 @@
                         <p>Hotline: <a href="tel:0522336052">0522.336.052</a></p>
                     </div>
                 </div>
-                <hr style="border-color: #ffffff50;" />
+                <hr style="border-color:rgba(0, 0, 0, 0.31);" />
                 <div class="text-center">
                     <p>© 2023 - GKM Care. All rights reserved.</p>
                 </div>
@@ -936,20 +1089,27 @@
         </div>
     </div>
 
-    <!-- Bong bóng chat Zalo -->
-    <div class="zalo-chat-btn" id="zaloChatBtn">
-        <img src="https://nhanvanauto.vn/wp-content/uploads/2024/01/a9025424-6f3f-4804-8a0e-d9f5ae2b80ff-cover.png" alt="Zalo">
-    </div>
-
-    <!-- Bong bóng chatbot -->
-    <div class="chatbot-toggle-btn" id="chatbotToggleBtn" title="Hỏi chăm sóc">
-        <i class="fas fa-comment-dots"></i>
+    <!-- Mini Chat Widget -->
+    <div class="mini-chat-widget" id="miniChatWidget">
+        <div class="mini-chat-toggle" id="miniChatToggle" title="Hỗ trợ khách hàng">
+            <i class="fas fa-headset"></i>
+        </div>
+        <div class="mini-chat-options" id="miniChatOptions" style="display: none;">
+            <div class="chat-option" id="zaloOption">
+                <img src="https://nhanvanauto.vn/wp-content/uploads/2024/01/a9025424-6f3f-4804-8a0e-d9f5ae2b80ff-cover.png" alt="Zalo" class="chat-icon">
+                <span>Zalo</span>
+            </div>
+            <div class="chat-option" id="chatbotOption">
+                <i class="fas fa-user-md"></i>
+                <span>Tư vấn AI</span>
+            </div>
+        </div>
     </div>
 
     <!-- Khung Chatbot -->
     <div id="chatbot-container" style="display: none;">
         <div id="chatbot-header">
-            🩺 Tư vấn Chăm Sóc
+            <i class="fas fa-stethoscope" style="margin-right: 8px;"></i>Trợ lý Y tế AI
             <button id="close-chatbot" title="Đóng" style="float:right; background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">×</button>
         </div>
         <div id="chatbot-messages"></div>
@@ -988,115 +1148,174 @@
     @RenderSection("Scripts", required: false)
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const btn = document.getElementById("chatbotToggleBtn");
+            const miniChatWidget = document.getElementById("miniChatWidget");
+            const miniChatToggle = document.getElementById("miniChatToggle");
+            const miniChatOptions = document.getElementById("miniChatOptions");
+            const zaloOption = document.getElementById("zaloOption");
+            const chatbotOption = document.getElementById("chatbotOption");
             const container = document.getElementById("chatbot-container");
             const messagesContainer = document.getElementById("chatbot-messages");
             const questionInput = document.getElementById("chatbot-question");
             const closeBtn = document.getElementById("close-chatbot");
-            const zaloBtn = document.getElementById("zaloChatBtn");
 
             let isDragging = false;
-            let isDraggingZalo = false;
             let offsetX = 0;
             let offsetY = 0;
-            let zaloOffsetX = 0;
-            let zaloOffsetY = 0;
             let startX = 0;
             let startY = 0;
-            let zaloStartX = 0;
-            let zaloStartY = 0;
 
-            // Thêm sự kiện click outside để đóng chatbot
-            document.addEventListener('click', function(event) {
-                const isClickInside = container.contains(event.target) || btn.contains(event.target);
-                if (!isClickInside && container.style.display === 'block') {
-                    container.style.display = 'none';
-                }
-            });
-
-            // Xử lý kéo thả cho nút chatbot
-            btn.addEventListener("mousedown", function (e) {
-                if (e.target === btn || e.target.parentElement === btn) {
+            // Drag functionality
+            miniChatToggle.addEventListener("mousedown", function(e) {
+                if (e.target === miniChatToggle || e.target.parentElement === miniChatToggle) {
                     isDragging = true;
-                    offsetX = e.clientX - btn.getBoundingClientRect().left;
-                    offsetY = e.clientY - btn.getBoundingClientRect().top;
+                    offsetX = e.clientX - miniChatWidget.getBoundingClientRect().left;
+                    offsetY = e.clientY - miniChatWidget.getBoundingClientRect().top;
                     startX = e.clientX;
                     startY = e.clientY;
-                    btn.style.transition = "none";
+                    miniChatWidget.style.transition = "none";
                 }
             });
 
-            // Xử lý kéo thả cho nút Zalo
-            zaloBtn.addEventListener("mousedown", function (e) {
-                if (e.target === zaloBtn || e.target.parentElement === zaloBtn) {
-                    isDraggingZalo = true;
-                    zaloOffsetX = e.clientX - zaloBtn.getBoundingClientRect().left;
-                    zaloOffsetY = e.clientY - zaloBtn.getBoundingClientRect().top;
-                    zaloStartX = e.clientX;
-                    zaloStartY = e.clientY;
-                    zaloBtn.style.transition = "none";
+            // Touch events for mobile
+            miniChatToggle.addEventListener("touchstart", function(e) {
+                if (e.target === miniChatToggle || e.target.parentElement === miniChatToggle) {
+                    isDragging = true;
+                    const touch = e.touches[0];
+                    offsetX = touch.clientX - miniChatWidget.getBoundingClientRect().left;
+                    offsetY = touch.clientY - miniChatWidget.getBoundingClientRect().top;
+                    startX = touch.clientX;
+                    startY = touch.clientY;
+                    miniChatWidget.style.transition = "none";
                 }
             });
 
+            // Toggle mini chat options (only if not dragging)
+            miniChatToggle.addEventListener("click", function(e) {
+                e.stopPropagation();
+                const endX = e.clientX || (e.touches && e.touches[0].clientX);
+                const endY = e.clientY || (e.touches && e.touches[0].clientY);
+                const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                
+                if (distance < 5) { // Nếu di chuyển ít hơn 5px, coi như là click
+                    if (miniChatOptions.classList.contains('show')) {
+                        // Đóng options
+                        miniChatOptions.classList.remove('show');
+                        miniChatToggle.classList.remove('active');
+                        setTimeout(() => {
+                            miniChatOptions.style.display = 'none';
+                        }, 300);
+                    } else {
+                        // Mở options
+                        miniChatOptions.style.display = 'block';
+                        setTimeout(() => {
+                            miniChatOptions.classList.add('show');
+                            miniChatToggle.classList.add('active');
+                            // Thêm hiệu ứng cho từng option
+                            const options = miniChatOptions.querySelectorAll('.chat-option');
+                            options.forEach((option, index) => {
+                                setTimeout(() => {
+                                    option.classList.add('show');
+                                }, index * 100);
+                            });
+                        }, 10);
+                    }
+                }
+            });
+
+            // Zalo option click
+            zaloOption.addEventListener("click", function(e) {
+                e.stopPropagation();
+                window.open('https://zalo.me/0522336052', '_blank');
+                miniChatOptions.classList.remove('show');
+                miniChatToggle.classList.remove('active');
+                setTimeout(() => {
+                    miniChatOptions.style.display = 'none';
+                }, 300);
+            });
+
+            // Chatbot option click
+            chatbotOption.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (container.style.display === 'none' || container.style.display === '') {
+                    container.style.display = 'block';
+                    if (messagesContainer.innerHTML.trim() === '') {
+                        messagesContainer.innerHTML = `<div class="bot-message"><strong>Trợ lý AI:</strong> Xin chào! Tôi là trợ lý y tế AI của GKM Care. Tôi có thể hỗ trợ bạn về các vấn đề sức khỏe và chăm sóc. Bạn cần tư vấn gì?</div>`;
+                    }
+                } else {
+                    container.style.display = 'none';
+                }
+                miniChatOptions.classList.remove('show');
+                miniChatToggle.classList.remove('active');
+                setTimeout(() => {
+                    miniChatOptions.style.display = 'none';
+                }, 300);
+            });
+
+
+            // Click outside để đóng mini chat options
+            document.addEventListener('click', function(event) {
+                const isClickInside = miniChatWidget.contains(event.target);
+                if (!isClickInside) {
+                    miniChatOptions.classList.remove('show');
+                    miniChatToggle.classList.remove('active');
+                    setTimeout(() => {
+                        miniChatOptions.style.display = 'none';
+                    }, 300);
+                }
+            });
+
+            // Mouse move events
             document.addEventListener("mousemove", function (e) {
                 if (isDragging) {
                     const x = e.clientX - offsetX;
                     const y = e.clientY - offsetY;
 
-                    btn.style.left = `${x}px`;
-                    btn.style.top = `${y}px`;
-
-                    if (container.style.display === 'block') {
-                        const containerWidth = container.offsetWidth;
-                        container.style.left = `${x + btn.offsetWidth - containerWidth}px`;
-                        container.style.top = `${y - container.offsetHeight - 10}px`;
-                    }
-                }
-
-                if (isDraggingZalo) {
-                    const x = e.clientX - zaloOffsetX;
-                    const y = e.clientY - zaloOffsetY;
-
-                    zaloBtn.style.left = `${x}px`;
-                    zaloBtn.style.top = `${y}px`;
+                    miniChatWidget.style.left = `${x}px`;
+                    miniChatWidget.style.top = `${y}px`;
+                    miniChatWidget.style.right = 'auto';
+                    miniChatWidget.style.bottom = 'auto';
                 }
             });
 
+            // Touch move events for mobile
+            document.addEventListener("touchmove", function (e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const x = touch.clientX - offsetX;
+                    const y = touch.clientY - offsetY;
+
+                    miniChatWidget.style.left = `${x}px`;
+                    miniChatWidget.style.top = `${y}px`;
+                    miniChatWidget.style.right = 'auto';
+                    miniChatWidget.style.bottom = 'auto';
+                }
+            });
+
+            // Mouse up events
             document.addEventListener("mouseup", function (e) {
                 if (isDragging) {
-                    const endX = e.clientX;
-                    const endY = e.clientY;
-                    const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-                    
-                    if (distance < 5) { // Nếu di chuyển ít hơn 5px, coi như là click
-                        const isVisible = container.style.display === 'block';
-                        if (!isVisible) {
-                            container.style.display = 'block';
-                            if (messagesContainer.innerHTML.trim() === '') {
-                                messagesContainer.innerHTML = `<div class="bot-message"><strong>Bot:</strong> Xin chào! Mình là trợ lý chăm sóc sức khỏe. Bạn cần mình hỗ trợ điều gì?</div>`;
-                            }
-                        } else {
-                            container.style.display = 'none';
-                        }
-                    }
-                    
                     isDragging = false;
-                    btn.style.transition = "";
-                }
-
-                if (isDraggingZalo) {
-                    const endX = e.clientX;
-                    const endY = e.clientY;
-                    const distance = Math.sqrt(Math.pow(endX - zaloStartX, 2) + Math.pow(endY - zaloStartY, 2));
-                    
-                    if (distance < 5) { // Nếu di chuyển ít hơn 5px, coi như là click
-                        window.open('https://zalo.me/0522336052', '_blank');
-                    }
-                    
-                    isDraggingZalo = false;
-                    zaloBtn.style.transition = "";
+                    miniChatWidget.style.transition = "";
                 }
             });
+
+            // Touch end events for mobile
+            document.addEventListener("touchend", function (e) {
+                if (isDragging) {
+                    isDragging = false;
+                    miniChatWidget.style.transition = "";
+                }
+            });
+
+            // Thêm sự kiện click outside để đóng chatbot
+            document.addEventListener('click', function(event) {
+                const isClickInside = container.contains(event.target) || chatbotOption.contains(event.target);
+                if (!isClickInside && container.style.display === 'block') {
+                    container.style.display = 'none';
+                }
+            });
+
 
             closeBtn.addEventListener("click", function (e) {
                 e.stopPropagation();
