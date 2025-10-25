@@ -24,7 +24,18 @@ namespace Chamsoc.Controllers
             _signInManager = signInManager;
         }
 
-       
+        public IActionResult Index()
+        {
+            // Lấy tối đa 12 caregiver để hiển thị slide (fallback nếu trống sẽ xử lý ở view)
+            var caregivers = _context.Caregivers
+                .OrderByDescending(c => c.IsVerified)
+                .ThenBy(c => c.Name)
+                .Take(12)
+                .ToList();
+
+            ViewBag.Caregivers = caregivers;
+            return View();
+        }
 
         public IActionResult GioiThieuSoQua()
         {

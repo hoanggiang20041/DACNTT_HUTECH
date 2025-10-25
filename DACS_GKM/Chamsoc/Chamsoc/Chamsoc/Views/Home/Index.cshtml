@@ -1,42 +1,91 @@
 @{
     ViewData["Title"] = "Trang chủ";
+    var caregivers = ViewBag.Caregivers as List<Chamsoc.Models.Caregiver> ?? new List<Chamsoc.Models.Caregiver>();
 }
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-12 text-center">
-            <h1 class="display-4">Chào mừng đến với GKM Care</h1>
-            <p class="lead">Dịch vụ chăm sóc sức khỏe tại nhà hàng đầu</p>
+<div class="container py-5">
+    <!-- Hero intro -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <h1 class="display-5 fw-bold text-primary mb-3" style="animation: fadeIn 0.6s ease-out both">Chăm sóc y tế tại nhà an toàn – tận tâm – chuyên nghiệp</h1>
+            <p class="lead text-muted" style="animation: fadeIn 0.8s ease-out both">GKM Care kết nối bạn với đội ngũ bác sĩ, y tá và điều dưỡng giàu kinh nghiệm. Dịch vụ khám – theo dõi – trị liệu tại nhà, đặt lịch linh hoạt, minh bạch chi phí.</p>
+            <div class="d-flex gap-2" style="animation: fadeIn 1s ease-out both">
+                <a class="btn btn-primary" asp-controller="Caregivers" asp-action="ListCaregivers">Đặt lịch ngay</a>
+                <a class="btn btn-secondary" asp-controller="Home" asp-action="GioiThieuSoQua">Tìm hiểu thêm</a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="animation: slideUp 0.6s ease-out both">
+                <img src="https://images.unsplash.com/photo-1580281657527-47e0186e9052?q=80&w=1200&auto=format&fit=crop" alt="Medical care" class="w-100 h-100 object-fit-cover" />
+            </div>
         </div>
     </div>
 
-    <div class="row mt-4">
+    <!-- Feature cards -->
+    <div class="row g-4 mb-5">
         <div class="col-md-4">
-            <div class="card">
+            <div class="card h-100 shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="card-title">Chăm sóc sức khỏe</h5>
-                    <p class="card-text">Dịch vụ chăm sóc sức khỏe chuyên nghiệp tại nhà</p>
+                    <p class="card-text">Khám tổng quát, theo dõi chỉ số, kê đơn – tư vấn dinh dưỡng.</p>
                     <a href="@Url.Action("ChamSocSucKhoe", "Home")" class="btn btn-primary">Tìm hiểu thêm</a>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card">
+            <div class="card h-100 shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="card-title">Vật lý trị liệu</h5>
-                    <p class="card-text">Phục hồi chức năng và vật lý trị liệu tại nhà</p>
+                    <p class="card-text">Phục hồi chức năng, trị liệu sau chấn thương theo lộ trình.</p>
                     <a href="@Url.Action("ChamSocVatLyTriLieu", "Home")" class="btn btn-primary">Tìm hiểu thêm</a>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card">
+            <div class="card h-100 shadow-sm border-0">
                 <div class="card-body">
-                    <h5 class="card-title">Giới thiệu</h5>
-                    <p class="card-text">Tìm hiểu thêm về GKM Care và dịch vụ của chúng tôi</p>
+                    <h5 class="card-title">Hỗ trợ 24/7</h5>
+                    <p class="card-text">Đặt lịch nhanh, thông báo thời gian thực, hỗ trợ khẩn cấp.</p>
                     <a href="@Url.Action("GioiThieuSoQua", "Home")" class="btn btn-primary">Tìm hiểu thêm</a>
                 </div>
             </div>
         </div>
     </div>
-</div> 
+
+    <!-- Doctor slider (circle avatars) -->
+    <h2 class="h4 fw-bold text-primary mb-3">Đội ngũ bác sĩ / điều dưỡng</h2>
+    <div class="position-relative">
+        <div class="d-flex overflow-auto gap-4 pb-2" style="scroll-snap-type:x mandatory;">
+            @if (caregivers.Any())
+            {
+                foreach (var c in caregivers)
+                {
+                    var avatar = string.IsNullOrEmpty(c.AvatarUrl) ? "/images/default-avatar.png" : c.AvatarUrl;
+                    <div class="text-center" style="min-width:140px; scroll-snap-align:start;">
+                        <img src="@avatar" alt="@c.Name" class="rounded-circle shadow-sm" style="width:110px; height:110px; object-fit:cover;" />
+                        <div class="mt-2 fw-semibold">@c.Name</div>
+                        <div class="text-muted small">@c.Skills</div>
+                    </div>
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    <div class="text-center" style="min-width:140px; scroll-snap-align:start;">
+                        <img src="https://via.placeholder.com/110x110.png?text=Doctor" alt="Doctor" class="rounded-circle shadow-sm" style="width:110px; height:110px; object-fit:cover;" />
+                        <div class="mt-2 fw-semibold">Bác sĩ @(i+1)</div>
+                        <div class="text-muted small">Chuyên khoa</div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    <style>
+        @@keyframes slideUp { from { opacity:0; transform: translateY(16px);} to { opacity:1; transform: translateY(0);} }
+        @@keyframes fadeIn { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform: translateY(0);} }
+    </style>
+}
