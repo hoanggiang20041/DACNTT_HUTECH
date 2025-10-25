@@ -1,0 +1,87 @@
+/* Auth pages - soft medical theme using Bootstrap 5 tokens */
+
+/* Palette */
+:root {
+    --medical-bg: #f5fbff;           /* very light blue */
+    --medical-panel: #ffffff;        /* white panels */
+    --medical-primary: #2b7abf;      /* soft medical blue */
+    --medical-primary-600: #246aa6;  /* hover */
+    --medical-muted: #6c757d;        /* bootstrap gray */
+    --medical-border: #e6eef6;       /* light blue border */
+    --medical-focus: rgba(43, 122, 191, 0.25);
+}
+
+/* Layout basics for auth pages */
+.auth-container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--medical-bg) 0%, #eef5ff 100%);
+}
+
+.auth-card {
+    background: var(--medical-panel);
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(43, 122, 191, 0.08);
+    border: 1px solid var(--medical-border);
+    overflow: hidden;
+    animation: slideUp 420ms ease-out both;
+}
+
+.auth-card-header {
+    background: linear-gradient(180deg, #f7fbff 0%, #f1f7ff 100%);
+    color: var(--medical-primary);
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--medical-border);
+}
+
+/* Forms */
+.form-floating { position: relative; margin-bottom: 1.25rem; }
+.form-control, .form-select {
+    border: 1px solid var(--medical-border);
+    border-radius: 10px;
+    padding: 0.9rem 0.9rem 0.9rem 2.6rem;
+    font-size: 1rem;
+    transition: border-color 120ms ease-in-out, box-shadow 120ms ease-in-out, transform 120ms ease-in-out;
+    background: #ffffff;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--medical-primary);
+    box-shadow: 0 0 0 0.2rem var(--medical-focus);
+    background: #ffffff;
+}
+.form-floating > label { left: 2.6rem; color: var(--medical-muted); transition: all 0.2s ease; }
+
+/* Password toggle */
+.password-toggle {
+    position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--medical-muted); cursor: pointer;
+    padding: 0.45rem; border-radius: 50%; transition: background-color 120ms ease, color 120ms ease; z-index: 10;
+}
+.password-toggle:hover { color: var(--medical-primary); background: rgba(43, 122, 191, 0.08); }
+
+/* Buttons (compatible with Bootstrap btn classes) */
+.btn-primary,
+.medical-btn-primary { background: var(--medical-primary); border: 1px solid var(--medical-primary); border-radius: 10px; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 1rem; transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease; }
+.btn-primary:hover,
+.medical-btn-primary:hover { background: var(--medical-primary-600); border-color: var(--medical-primary-600); transform: translateY(-1px); }
+.btn-secondary { background: #90a4b8; border: 1px solid #90a4b8; border-radius: 10px; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 1rem; }
+.btn-secondary:hover { background: #7f93a7; border-color: #7f93a7; }
+
+/* Alerts */
+.alert { border-radius: 10px; border: 1px solid transparent; }
+.alert-danger { background: #fde8ea; color: #7c1c24; border-color: #facbd0; }
+.alert-success { background: #e9f7ee; color: #185c2f; border-color: #cfeeda; }
+
+/* Utility */
+.text-primary { color: var(--medical-primary) !important; }
+.text-muted { color: var(--medical-muted) !important; }
+
+/* Animations and media queries */
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 768px) {
+    .auth-card { margin: 1rem; border-radius: 12px; }
+    .auth-card-header { padding: 1.25rem; }
+}
+
+

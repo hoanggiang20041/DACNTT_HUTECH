@@ -52,9 +52,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-floating required-field">
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required />
-                                    <label for="password">Mật khẩu <span class="text-danger">*</span></label>
+                                <div class="form-floating required-field medical-input-group">
+                                    <input type="password" class="form-control medical-input" id="password" name="password" placeholder="Mật khẩu" required />
+                                    <label for="password"><i class="fas fa-lock me-2"></i>Mật khẩu <span class="text-danger">*</span></label>
+                                    <button type="button" class="password-toggle" onclick="togglePassword('password', 'passwordToggleIcon')">
+                                        <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                                    </button>
                                     <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
                                 </div>
                             </div>
@@ -77,6 +80,19 @@
                                         <input type="text" class="form-control" id="name" name="name" placeholder="Họ và tên" required />
                                         <label for="name">Họ và tên <span class="text-danger">*</span></label>
                                         <div class="invalid-feedback">Vui lòng nhập họ và tên.</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating required-field">
+                                        <select class="form-select" id="gender" name="gender" required>
+                                            <option value="">Chọn giới tính</option>
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                        <label for="gender">Giới tính <span class="text-danger">*</span></label>
+                                        <div class="invalid-feedback">Vui lòng chọn giới tính.</div>
                                     </div>
                                 </div>
 
@@ -163,101 +179,28 @@
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <style>
-        .required-field label::after {
-            content: " *";
-            color: #dc3545;
-        }
-
-        .form-floating > .form-control:focus ~ label,
-        .form-floating > .form-control:not(:placeholder-shown) ~ label {
-            transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
-            color: #0d6efd;
-        }
-
-        .form-control:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-
-        .form-control.is-invalid:focus {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
-        }
-
-        .form-control.is-valid:focus {
-            border-color: #198754;
-            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
-        }
-
-        .invalid-feedback {
-            display: none;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .was-validated .form-control:invalid ~ .invalid-feedback,
-        .form-control.is-invalid ~ .invalid-feedback {
-            display: block;
-        }
-
-        @@keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-floating > .form-control:focus,
-        .form-floating > .form-control:not(:placeholder-shown) {
-            padding-top: 1.625rem;
-            padding-bottom: 0.625rem;
-        }
-
-        .form-floating > label {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .form-control:focus {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .btn {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .alert {
-            animation: slideIn 0.3s ease-in-out;
-        }
-
-        @@keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        #careNeedsSuggestions {
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        .list-group-item {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .list-group-item:hover {
-            background-color: #f8f9fa;
-            transform: translateX(5px);
-        }
-    </style>
+    <link href="~/css/common/auth-common.css" rel="stylesheet" />
+    <link href="~/css/pages/register.css" rel="stylesheet" />
 }
 
 @section Scripts {
     <script>
+        // Toggle password visibility
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
         // Danh sách các loại bệnh cho gợi ý
         const diseases = [
             "Tiểu đường",

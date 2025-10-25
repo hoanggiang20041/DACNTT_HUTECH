@@ -464,7 +464,7 @@ namespace Chamsoc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string username, string email, string phoneNumber, string password, string role, string name, int age, string careNeeds, bool status, string skills, bool isAvailable, IFormFile certificate, IFormFileCollection identityAndHealthDocs, decimal price)
+        public async Task<IActionResult> Register(string username, string email, string phoneNumber, string password, string role, string name, int age, string careNeeds, bool status, string skills, bool isAvailable, IFormFile certificate, IFormFileCollection identityAndHealthDocs, decimal price, string gender)
         {
             try
             {
@@ -557,7 +557,7 @@ namespace Chamsoc.Controllers
                     FullName = name,
                     Address = "Chưa cập nhật",
                     DateOfBirth = new DateTime(1990, 1, 1),
-                    Gender = "Chưa cập nhật",
+                    Gender = string.IsNullOrWhiteSpace(gender) ? "Chưa cập nhật" : gender,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
                     EmailConfirmed = true,
