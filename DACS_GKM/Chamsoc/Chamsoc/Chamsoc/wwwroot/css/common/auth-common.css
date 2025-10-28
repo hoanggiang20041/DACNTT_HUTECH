@@ -39,25 +39,109 @@
 .form-control, .form-select {
     border: 1px solid var(--medical-border);
     border-radius: 10px;
-    padding: 0.9rem 0.9rem 0.9rem 2.6rem;
+    padding: 1.625rem 0.9rem 0.6rem 2.6rem;
     font-size: 1rem;
-    transition: border-color 120ms ease-in-out, box-shadow 120ms ease-in-out, transform 120ms ease-in-out;
+    transition: border-color 120ms ease-in-out, box-shadow 120ms ease-in-out;
     background: #ffffff;
+    height: calc(3.5rem + 2px);
 }
 .form-control:focus, .form-select:focus {
     border-color: var(--medical-primary);
     box-shadow: 0 0 0 0.2rem var(--medical-focus);
     background: #ffffff;
 }
-.form-floating > label { left: 2.6rem; color: var(--medical-muted); transition: all 0.2s ease; }
+.form-floating > label {
+    position: absolute;
+    height: 100%;
+    padding: 1rem 0 0 0.75rem;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: all 0.1s ease-in-out;
+    color: var(--medical-muted);
+    left: 0;
+}
+.form-floating > label::after {
+    content: "";
+    position: absolute;
+    inset: 0.25rem 0 0 0;
+    z-index: -1;
+    height: 0.5em;
+    background: var(--medical-panel);
+    width: 100%;
+}
+.form-control:focus ~ label,
+.form-control:not(:placeholder-shown) ~ label,
+.form-select:focus ~ label,
+.form-select:not([value=""]) ~ label {
+    opacity: 0.65;
+    transform: scale(0.85) translateY(-1rem) translateX(0.15rem);
+    padding: 0;
+}
+
+/* Input group with icon */
+.medical-input-group {
+    position: relative;
+}
+
+.medical-input-group label i {
+    position: absolute;
+    left: 0.9rem;
+    top: 1rem;
+    pointer-events: none;
+    color: var(--medical-muted);
+    transition: all 0.1s ease-in-out;
+    z-index: 1;
+}
+
+.medical-input-group.focused label i,
+.medical-input:focus ~ label i,
+.medical-input:not(:placeholder-shown) ~ label i {
+    color: var(--medical-primary);
+}
+
+.medical-input-group.focused label,
+.medical-input:focus ~ label,
+.medical-input:not(:placeholder-shown) ~ label {
+    opacity: 0.65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.medical-input-group.focused label i,
+.medical-input:focus ~ label i,
+.medical-input:not(:placeholder-shown) ~ label i {
+    transform: scale(0.85);
+    top: -0.5rem;
+}
 
 /* Password toggle */
 .password-toggle {
-    position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
-    background: none; border: none; color: var(--medical-muted); cursor: pointer;
-    padding: 0.45rem; border-radius: 50%; transition: background-color 120ms ease, color 120ms ease; z-index: 10;
+    position: absolute; 
+    right: 1rem; 
+    top: 50%; 
+    transform: translateY(-50%);
+    background: none; 
+    border: none; 
+    color: var(--medical-muted); 
+    cursor: pointer;
+    padding: 0.45rem; 
+    border-radius: 50%; 
+    transition: background-color 120ms ease, color 120ms ease; 
+    z-index: 10;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.password-toggle:hover { color: var(--medical-primary); background: rgba(43, 122, 191, 0.08); }
+.password-toggle:hover { 
+    color: var(--medical-primary); 
+    background: rgba(43, 122, 191, 0.08); 
+}
+.password-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(43, 122, 191, 0.25);
+}
 
 /* Buttons (compatible with Bootstrap btn classes) */
 .btn-primary,

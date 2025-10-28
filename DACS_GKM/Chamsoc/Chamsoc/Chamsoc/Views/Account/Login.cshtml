@@ -21,15 +21,15 @@
                     <div class="card-body p-4">
                         <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
                             
-                            <div class="form-floating mb-3 medical-input-group">
-                                <input asp-for="Username" class="form-control medical-input" placeholder="Tên đăng nhập" />
-                                <label asp-for="Username"><i class="fas fa-user me-2"></i>Tên đăng nhập</label>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Username" class="form-control" id="username" placeholder=" " />
+                                <label asp-for="Username">Tên đăng nhập</label>
                                 <span asp-validation-for="Username" class="text-danger"></span>
                             </div>
                             
-                            <div class="form-floating mb-3 medical-input-group">
-                                <input asp-for="Password" class="form-control medical-input" id="password" type="password" placeholder="Mật khẩu" />
-                                <label asp-for="Password"><i class="fas fa-lock me-2"></i>Mật khẩu</label>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Password" class="form-control" id="password" type="password" placeholder=" " />
+                                <label asp-for="Password">Mật khẩu</label>
                                 <button type="button" class="password-toggle" onclick="togglePassword()">
                                     <i class="fas fa-eye" id="passwordToggleIcon"></i>
                                 </button>
@@ -82,15 +82,18 @@
             }
         }
 
-        // Thêm hiệu ứng focus cho các input
-        document.querySelectorAll('.medical-input').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-            });
+        // Initialize floating labels for inputs with placeholders
+        document.querySelectorAll('.form-floating input, .form-floating select').forEach(element => {
+            // Initialize state
+            if (element.value || element.type === 'select-one') {
+                element.classList.add('has-value');
+            }
             
-            input.addEventListener('blur', function() {
-                if (!this.value) {
-                    this.parentElement.classList.remove('focused');
+            element.addEventListener('input', function() {
+                if (this.value) {
+                    this.classList.add('has-value');
+                } else {
+                    this.classList.remove('has-value');
                 }
             });
         });

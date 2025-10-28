@@ -1,6 +1,6 @@
 ﻿@model Chamsoc.Models.CaregiverViewModel
 @{
-    ViewData["Title"] = "Cập Nhật Hồ Sơ Người Chăm Sóc";
+    ViewData["Title"] = "Cập Nhật Hồ Sơ Người Chăm Sóc ";
     string currentUserRole = ViewBag.CurrentUserRole;
 }
 
@@ -114,6 +114,59 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+    .address-suggestions {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: white !important;
+        border: 1px solid #ddd !important;
+        border-top: none !important;
+        border-radius: 0 0 4px 4px !important;
+        max-height: 200px !important;
+        overflow-y: auto !important;
+        z-index: 9999 !important;
+        display: none !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+        width: 100% !important;
+    }
+
+    .address-suggestion-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s;
+    }
+
+    .address-suggestion-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .address-suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .address-suggestion-item .suggestion-text {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .address-suggestion-item .suggestion-detail {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+    }
+
+    .address-suggestion-item.selected {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .address-suggestion-item.selected .suggestion-text,
+    .address-suggestion-item.selected .suggestion-detail {
+        color: white;
+    }
 </style>
 
 <div class="loading-overlay">
@@ -125,7 +178,7 @@
         <div class="col-md-8 col-lg-6">
             <div class="profile-card p-4">
                 <h2 class="text-center mb-4">
-                    <i class="fas fa-user-edit me-2"></i>Cập Nhật Hồ Sơ Người Chăm Sóc
+                    <i class="fas fa-user-edit me-2"></i>Cập Nhật Hồ Sơ Người Chăm Sóc 
                 </h2>
 
                 @if (TempData["ErrorMessage"] != null)
@@ -214,6 +267,59 @@
                         <label for="contact"><i class="fas fa-phone me-2"></i>Số điện thoại</label>
                         <div class="invalid-feedback">
                             Vui lòng nhập số điện thoại gồm đúng 10 chữ số.
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select class="form-control" id="gender" name="gender" required>
+                            <option value="">Chọn giới tính</option>
+                            @if (ViewBag.User?.Gender == "Nam")
+                            {
+                                <option value="Nam" selected>Nam</option>
+                            }
+                            else
+                            {
+                                <option value="Nam">Nam</option>
+                            }
+                            @if (ViewBag.User?.Gender == "Nữ")
+                            {
+                                <option value="Nữ" selected>Nữ</option>
+                            }
+                            else
+                            {
+                                <option value="Nữ">Nữ</option>
+                            }
+                            @if (ViewBag.User?.Gender == "Khác")
+                            {
+                                <option value="Khác" selected>Khác</option>
+                            }
+                            else
+                            {
+                                <option value="Khác">Khác</option>
+                            }
+                        </select>
+                        <label for="gender"><i class="fas fa-venus-mars me-2"></i>Giới tính</label>
+                        <div class="invalid-feedback">
+                            Vui lòng chọn giới tính.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label"><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ</label>
+                        <div class="position-relative">
+                            <textarea class="form-control" id="address" name="address" rows="3" required placeholder="Nhập địa chỉ để xem gợi ý...">@(ViewBag.User?.Address ?? "")</textarea>
+                            <div id="addressSuggestions" class="address-suggestions"></div>
+                        </div>
+                        <div class="d-flex gap-2 mt-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="autoLocationBtn">
+                                <i class="fas fa-map-marker-alt me-1"></i>Cập nhật địa chỉ tự động
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="clearAddressBtn">
+                                <i class="fas fa-eraser me-1"></i>Xóa địa chỉ
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">
+                            Vui lòng nhập địa chỉ.
                         </div>
                     </div>
 
@@ -389,6 +495,8 @@
                 let skills = document.getElementById('skills').value;
                 let email = document.getElementById('email').value;
                 let contact = document.getElementById('contact').value;
+                let gender = document.getElementById('gender').value;
+                let address = document.getElementById('address').value;
                 let price = document.getElementById('priceHidden').value;
                 let errors = [];
 
@@ -410,6 +518,16 @@
                     document.getElementById('skills').classList.add('is-invalid');
                 }
 
+                if (!gender || gender.trim() === '') {
+                    errors.push(`Vui lòng chọn giới tính.`);
+                    document.getElementById('gender').classList.add('is-invalid');
+                }
+
+                if (!address || address.trim() === '') {
+                    errors.push(`Vui lòng nhập địa chỉ.`);
+                    document.getElementById('address').classList.add('is-invalid');
+                }
+
                 if (!price || parseInt(price) <= 0) {
                     errors.push(`Thù lao phải lớn hơn 0.`);
                     document.getElementById('price').classList.add('is-invalid');
@@ -421,6 +539,479 @@
                 } else {
                     loadingOverlay.style.display = 'flex';
                 }
+            });
+
+            // Address Autocomplete
+            const addressInput = document.getElementById('address');
+            const addressSuggestions = document.getElementById('addressSuggestions');
+            
+            // Debug: Kiểm tra xem elements có tồn tại không
+            console.log('Address Input:', addressInput);
+            console.log('Address Suggestions:', addressSuggestions);
+            
+            // Kiểm tra xem elements có tồn tại không
+            if (!addressInput || !addressSuggestions) {
+                console.error('Address input or suggestions element not found!');
+                return;
+            }
+            
+            // Test đơn giản - thêm một gợi ý cố định để test
+            addressInput.addEventListener('focus', () => {
+                console.log('Address input focused');
+                addressSuggestions.innerHTML = '<div class="address-suggestion-item"><div class="suggestion-text">Test Address - 123 Test Street</div><div class="suggestion-detail">Test địa chỉ</div></div>';
+                addressSuggestions.style.display = 'block';
+            });
+            
+            // Danh sách địa chỉ gợi ý Việt Nam (sử dụng cùng danh sách như Senior)
+            const vietnamAddresses = [
+                "123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "456 Lê Lợi, Quận 1, TP. Hồ Chí Minh", 
+                "789 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "321 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "654 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "987 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "147 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "258 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "369 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "741 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "852 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "963 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "159 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "357 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "468 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "579 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "680 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "791 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "802 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "913 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "24 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "35 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "46 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "57 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "68 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "79 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "80 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "91 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "102 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "113 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "124 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "135 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "146 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "157 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "168 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "179 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "180 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "191 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "202 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "213 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "224 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "235 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "246 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "257 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "268 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "279 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "280 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "291 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "302 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "313 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "324 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "335 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "346 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "357 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "368 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "379 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "380 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "391 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "402 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "413 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "424 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "435 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "446 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "457 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "468 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "479 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "480 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "491 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "502 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "513 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "524 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "535 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "546 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "557 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "568 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "579 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "580 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "591 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "602 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "613 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "624 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "635 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "646 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "657 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "668 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "679 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "680 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "691 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "702 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "713 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "724 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "735 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "746 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "757 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "768 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "779 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "780 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "791 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "802 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "813 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "824 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "835 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "846 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "857 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "868 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "879 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "880 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "891 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "902 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "913 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "924 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "935 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "946 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "957 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "968 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "979 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "980 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "991 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1002 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1013 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1024 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "1035 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "1046 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "1057 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "1068 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1079 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1080 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "1091 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1102 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "1113 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1124 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1135 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "1146 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "1157 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "1168 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "1179 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "1180 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "1191 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "1202 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1213 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "1224 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1235 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "1246 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1257 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1268 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1279 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "1280 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "1291 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "1302 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "1313 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1324 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1335 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "1346 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1357 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "1368 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1379 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1380 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "1391 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "1402 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "1413 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "1424 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "1435 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "1446 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "1457 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1468 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "1479 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1480 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "1491 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1502 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1513 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1524 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "1535 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "1546 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "1557 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "1568 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1579 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1580 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "1591 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1602 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "1613 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1624 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1635 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "1646 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "1657 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "1668 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "1679 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "1680 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "1691 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "1702 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1713 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "1724 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1735 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "1746 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1757 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1768 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1779 Phạm Ngũ Lão, Quận 1, TP. Hồ Chí Minh",
+                "1780 Bùi Viện, Quận 1, TP. Hồ Chí Minh",
+                "1791 Đề Thám, Quận 1, TP. Hồ Chí Minh",
+                "1802 Nguyễn Thái Học, Quận 1, TP. Hồ Chí Minh",
+                "1813 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1824 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1835 Lê Lợi, Quận 1, TP. Hồ Chí Minh",
+                "1846 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                "1857 Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh",
+                "1868 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "1879 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
+                "1880 Đinh Tiên Hoàng, Quận 1, TP. Hồ Chí Minh",
+                "1891 Nguyễn Du, Quận 1, TP. Hồ Chí Minh",
+                "1902 Pasteur, Quận 3, TP. Hồ Chí Minh",
+                "1913 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh",
+                "1924 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh",
+                "1935 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh",
+                "1946 Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh",
+                "1957 Nguyễn Thị Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                "1968 Đồng Khởi, Quận 1, TP. Hồ Chí Minh",
+                "1979 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                "1980 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+                "1991 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh",
+                "2002 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh"
+            ];
+
+            // Hàm tìm kiếm địa chỉ
+            function searchAddresses(query) {
+                if (query.length < 2) return [];
+                
+                return vietnamAddresses.filter(address => 
+                    address.toLowerCase().includes(query.toLowerCase())
+                ).slice(0, 10); // Chỉ hiển thị 10 kết quả đầu tiên
+            }
+
+            // Hàm hiển thị gợi ý
+            function showSuggestions(suggestions) {
+                console.log('showSuggestions called with:', suggestions);
+                
+                if (suggestions.length === 0) {
+                    addressSuggestions.style.display = 'none';
+                    return;
+                }
+
+                addressSuggestions.innerHTML = '';
+                suggestions.forEach(suggestion => {
+                    const item = document.createElement('div');
+                    item.className = 'address-suggestion-item';
+                    item.innerHTML = `
+                        <div class="suggestion-text">${suggestion}</div>
+                        <div class="suggestion-detail">Địa chỉ tại TP. Hồ Chí Minh</div>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        addressInput.value = suggestion;
+                        addressSuggestions.style.display = 'none';
+                    });
+                    
+                    addressSuggestions.appendChild(item);
+                });
+                
+                addressSuggestions.style.display = 'block';
+                console.log('Suggestions displayed');
+            }
+
+            // Xử lý sự kiện input
+            addressInput.addEventListener('input', (e) => {
+                console.log('Input event triggered:', e.target.value);
+                const query = e.target.value.trim();
+                const suggestions = searchAddresses(query);
+                console.log('Found suggestions:', suggestions);
+                showSuggestions(suggestions);
+            });
+
+            // Ẩn gợi ý khi click ra ngoài
+            document.addEventListener('click', (e) => {
+                if (!addressInput.contains(e.target) && !addressSuggestions.contains(e.target)) {
+                    addressSuggestions.style.display = 'none';
+                }
+            });
+
+            // Xử lý phím tắt
+            addressInput.addEventListener('keydown', (e) => {
+                const suggestions = addressSuggestions.querySelectorAll('.address-suggestion-item');
+                let selectedIndex = -1;
+                
+                suggestions.forEach((item, index) => {
+                    if (item.classList.contains('selected')) {
+                        selectedIndex = index;
+                    }
+                });
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (selectedIndex < suggestions.length - 1) {
+                        suggestions[selectedIndex]?.classList.remove('selected');
+                        suggestions[selectedIndex + 1].classList.add('selected');
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (selectedIndex > 0) {
+                        suggestions[selectedIndex]?.classList.remove('selected');
+                        suggestions[selectedIndex - 1].classList.add('selected');
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0) {
+                        addressInput.value = suggestions[selectedIndex].querySelector('.suggestion-text').textContent;
+                        addressSuggestions.style.display = 'none';
+                    }
+                } else if (e.key === 'Escape') {
+                    addressSuggestions.style.display = 'none';
+                }
+            });
+
+            // Auto Location Button
+            const autoLocationBtn = document.getElementById('autoLocationBtn');
+            const clearAddressBtn = document.getElementById('clearAddressBtn');
+
+            // Hàm lấy vị trí hiện tại
+            function getCurrentLocation() {
+                if (!navigator.geolocation) {
+                    alert('Trình duyệt không hỗ trợ định vị địa lý');
+                    return;
+                }
+
+                autoLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang lấy vị trí...';
+                autoLocationBtn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        console.log('Current position:', lat, lng);
+                        
+                        // Sử dụng reverse geocoding để chuyển đổi tọa độ thành địa chỉ
+                        reverseGeocode(lat, lng);
+                    },
+                    (error) => {
+                        console.error('Geolocation error:', error);
+                        let errorMessage = 'Không thể lấy vị trí: ';
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Người dùng từ chối quyền truy cập vị trí';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Thông tin vị trí không khả dụng';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Hết thời gian chờ lấy vị trí';
+                                break;
+                            default:
+                                errorMessage += 'Lỗi không xác định';
+                                break;
+                        }
+                        
+                        alert(errorMessage);
+                        resetAutoLocationBtn();
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            }
+
+            // Hàm reverse geocoding (chuyển đổi tọa độ thành địa chỉ)
+            function reverseGeocode(lat, lng) {
+                // Sử dụng Nominatim (OpenStreetMap) API miễn phí
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=vi`;
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Reverse geocoding result:', data);
+                        
+                        if (data && data.display_name) {
+                            // Tạo địa chỉ từ thông tin chi tiết
+                            let address = '';
+                            
+                            if (data.address) {
+                                const addr = data.address;
+                                
+                                // Xây dựng địa chỉ từ các thành phần
+                                if (addr.house_number) address += addr.house_number + ' ';
+                                if (addr.road) address += addr.road + ', ';
+                                if (addr.suburb) address += addr.suburb + ', ';
+                                if (addr.city_district) address += addr.city_district + ', ';
+                                if (addr.city) address += addr.city + ', ';
+                                if (addr.state) address += addr.state;
+                                
+                                // Nếu không có địa chỉ chi tiết, sử dụng display_name
+                                if (!address.trim()) {
+                                    address = data.display_name;
+                                }
+                            } else {
+                                address = data.display_name;
+                            }
+                            
+                            // Cập nhật vào ô địa chỉ
+                            addressInput.value = address;
+                            
+                            // Hiển thị thông báo thành công
+                            showNotification('Đã cập nhật địa chỉ tự động!', 'success');
+                        } else {
+                            throw new Error('Không thể lấy địa chỉ từ tọa độ');
+                        }
+                        
+                        resetAutoLocationBtn();
+                    })
+                    .catch(error => {
+                        console.error('Reverse geocoding error:', error);
+                        alert('Không thể chuyển đổi vị trí thành địa chỉ: ' + error.message);
+                        resetAutoLocationBtn();
+                    });
+            }
+
+            // Hàm reset nút auto location
+            function resetAutoLocationBtn() {
+                autoLocationBtn.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>Cập nhật địa chỉ tự động';
+                autoLocationBtn.disabled = false;
+            }
+
+            // Hàm hiển thị thông báo
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Tự động ẩn sau 3 giây
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+            }
+
+            // Event listeners cho các nút
+            autoLocationBtn.addEventListener('click', getCurrentLocation);
+            
+            clearAddressBtn.addEventListener('click', () => {
+                addressInput.value = '';
+                addressSuggestions.style.display = 'none';
+                showNotification('Đã xóa địa chỉ!', 'info');
             });
 
             // Đóng alert tự động sau 5 giây

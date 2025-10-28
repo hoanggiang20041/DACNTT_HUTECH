@@ -6,7 +6,7 @@
 @{
     ViewData["Title"] = "Danh Sách Người Cần Chăm Sóc";
     var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
-    var currentUserName = User.Identity.Name ?? "Người dùng không xác định";
+    var currentUserName = User?.Identity?.Name ?? "Người dùng không xác định";
 }
 
 <style>
@@ -387,7 +387,7 @@
                         <div class="card-body">
                             <div class="text-center mb-3">
                                 <img src="@(string.IsNullOrEmpty(senior.AvatarUrl) ? 
-                                    $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(senior.Name)}&background=random&size=200" : 
+                                    $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(senior.Name ?? "User")}&background=random&size=200" : 
                                     senior.AvatarUrl)" 
                                      alt="Avatar" class="rounded-circle" 
                                      style="width: 100px; height: 100px; object-fit: cover;" />
@@ -439,14 +439,15 @@
                         <div class="card-footer bg-transparent border-top-0 text-center">
                             @if (senior.Status && senior.IsVerified)
                             {
-                                <button class="btn btn-primary start-audio-call" 
+                                // chỉ giữ nút video call
+                                <button class="btn btn-success start-mirotalk-call" 
                                         data-userid="@senior.UserId"
                                         data-username="@senior.Name"
-                                        data-avatar="@(string.IsNullOrEmpty(senior.AvatarUrl) ? "/images/default-avatar.png" : senior.AvatarUrl)">
-                                    <i class="fas fa-phone me-2"></i>Gọi điện
+                                        data-isvideo="true">
+                                    <i class="bi bi-camera-video-fill me-2"></i>Gọi Video
                                 </button>
                                 <a asp-action="BookSenior" asp-route-seniorId="@senior.Id" 
-                                   class="btn btn-success">
+                                   class="btn btn-info">
                                     <i class="fas fa-calendar-plus me-2"></i>Đặt lịch
                                 </a>
                             }
@@ -523,8 +524,8 @@
         let targetUserId = null;
         let targetUserName = null;
         let targetAvatar = null;
-        let currentUserName = '@User.Identity.Name';
-        let currentUserAvatar = '@(User.FindFirst("AvatarUrl")?.Value ?? "https://ui-avatars.com/api/?name=" + User.Identity.Name + "&background=random")';
+        let currentUserName = '@(User?.Identity?.Name ?? "Người dùng không xác định")';
+        let currentUserAvatar = '@((User?.FindFirst("AvatarUrl")?.Value) ?? ("https://ui-avatars.com/api/?name=" + (User?.Identity?.Name ?? "User") + "&background=random"))';
         let connection = null;
 
         const config = {
@@ -601,6 +602,14 @@
                     showError("Đã kết nối lại");
                 });
 
+                // Add mic state handling
+                connection.on("ReceiveMicState", (isEnabled) => {
+                    const muteIcon = document.getElementById('toggleMicBtn').querySelector('i');
+                    if (muteIcon) {
+                        muteIcon.className = isEnabled ? 'bi bi-mic-fill' : 'bi bi-mic-mute-fill';
+                    }
+                });
+
                 await connection.start();
                 console.log("SignalR Connected to callHub successfully.");
                 updateCallStatus("Đã kết nối");
@@ -611,6 +620,134 @@
                 setTimeout(initializeSignalR, 5000);
             }
         }
+
+        // Track external call window
+        let miroTalkWindowRef = null;
+
+        // Function to show MiroTalk popup
+        function showMiroTalkPopup(url, windowName, displayName) {
+            // Create popup overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'miroTalkOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.8);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            // Create popup container
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                width: 90vw;
+                height: 90vh;
+                background: white;
+                border-radius: 12px;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+
+            if (displayName) {
+                const titleBar = document.createElement('div');
+                titleBar.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 44px;
+                    background: #0d6efd;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 16px;
+                    font-weight: 600;
+                    z-index: 10001;
+                `;
+                titleBar.textContent = displayName;
+                popup.appendChild(titleBar);
+            }
+            
+            // Create close button
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '✕';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: #ff4444;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                cursor: pointer;
+                z-index: 10000;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            closeBtn.onclick = () => {
+                document.body.removeChild(overlay);
+            };
+            
+            // Create iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.cssText = `
+                width: 100%;
+                height: 100%;
+                border: none;
+            `;
+            iframe.allow = 'camera; microphone; autoplay; fullscreen; display-capture; encrypted-media; clipboard-write; gyroscope; accelerometer';
+            iframe.allowFullscreen = true;
+            
+            popup.appendChild(closeBtn);
+            popup.appendChild(iframe);
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+            
+            console.log('MiroTalk popup opened:', url);
+        }
+
+        // Open in new tab and expose utils globally
+        window.showMiroTalkPopup = showMiroTalkPopup;
+        window.showMiroTalkTab = function(url, displayName) {
+            try {
+                const withName = displayName ? `${url}?name=${encodeURIComponent(displayName)}` : url;
+                miroTalkWindowRef = window.open(withName, '_blank');
+                if (!miroTalkWindowRef) {
+                    alert('Trình duyệt chặn popup. Vui lòng cho phép.');
+                } else {
+                    miroTalkWindowRef.focus();
+                }
+            } catch (e) {
+                console.error('Không thể mở tab MiroTalk:', e);
+            }
+        };
+        window.closeMiroTalkPopup = function() {
+            try {
+                const overlay = document.getElementById('miroTalkOverlay');
+                if (overlay && overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            } catch {}
+        };
+        window.closeMiroTalkTab = function() {
+            try {
+                if (miroTalkWindowRef && !miroTalkWindowRef.closed) {
+                    miroTalkWindowRef.close();
+                }
+                miroTalkWindowRef = null;
+            } catch {}
+        };
 
         // Khởi tạo kết nối khi trang được tải
         document.addEventListener('DOMContentLoaded', function() {
@@ -659,6 +796,65 @@
             }
         }
 
+        // Hàm bắt đầu cuộc gọi với MiroTalk P2P
+        async function startMiroTalkCall(userId, userName, isVideoCall = true) {
+            try {
+                console.log(`🎥 Starting MiroTalk P2P ${isVideoCall ? 'video' : 'audio'} call to:`, userName);
+                
+                // Tạo phòng MiroTalk P2P
+                const response = await fetch('/MiroTalk/CreateRoom', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ReceiverId: userId,
+                        ReceiverName: userName,
+                        IsVideoCall: isVideoCall
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Không thể tạo phòng cuộc gọi');
+                }
+
+                const result = await response.json();
+                const roomId = result.roomId;
+
+                console.log('✅ Room created:', roomId);
+
+                // Gửi thông báo cuộc gọi đến qua SignalR
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    console.log('📤 Sending video call notification to:', userId);
+                    console.log('📤 Caller name:', userName);
+                    console.log('📤 Room ID:', roomId);
+                    console.log('📤 Is video call:', isVideoCall);
+                    
+                    await connection.invoke("SendVideoCallNotification", userId, userName, roomId, isVideoCall);
+                    console.log('✅ Video call notification sent successfully');
+                } else {
+                    console.error('❌ SignalR connection not ready:', connection?.state);
+                    alert('Không thể gửi thông báo cuộc gọi. Vui lòng thử lại.');
+                    return;
+                }
+
+                // Mở trực tiếp tới domain MiroTalk để có đầy đủ quyền mic/cam
+                const externalUrl = `https://p2p.mirotalk.com/join/${roomId}?name=${encodeURIComponent(currentUserName)}&autostart=1&mic=on&video=on`;
+                const wrapperUrl = `/MiroTalk/JoinRoom/${roomId}`;
+                if (window.showMiroTalkTab) {
+                    window.showMiroTalkTab(externalUrl, currentUserName);
+                } else {
+                    showMiroTalkPopup(wrapperUrl, 'mirotalk-call', currentUserName);
+                }
+
+                console.log('🎉 MiroTalk P2P call window opened successfully');
+
+            } catch (error) {
+                console.error('❌ Error starting MiroTalk call:', error);
+                alert('Không thể bắt đầu cuộc gọi: ' + error.message);
+            }
+        }
+
         // Hàm kết thúc cuộc gọi
         function endCall() {
             console.log("Ending call...");
@@ -677,6 +873,17 @@
             const callOverlay = document.getElementById('callOverlay');
             if (callPopup) callPopup.style.display = 'none';
             if (callOverlay) callOverlay.style.display = 'none';
+            if (typeof window.closeMiroTalkPopup === 'function') {
+                window.closeMiroTalkPopup();
+            }
+            if (typeof window.closeMiroTalkTab === 'function') {
+                try {
+                    if (window.miroTalkWindowRef && !window.miroTalkWindowRef.closed) {
+                        window.miroTalkWindowRef.postMessage('end-call', '*');
+                    }
+                } catch {}
+                window.closeMiroTalkTab();
+            }
             
             // Dừng tất cả âm thanh
             stopAudio('ringingAudio');
@@ -746,6 +953,17 @@
             });
         });
 
+        // Thêm sự kiện cho nút gọi video với MiroTalk P2P
+        document.querySelectorAll('.start-mirotalk-call').forEach(button => {
+            button.addEventListener('click', async function() {
+                const userId = this.dataset.userid;
+                const userName = this.dataset.username;
+                const isVideo = this.dataset.isvideo === 'true';
+                
+                await startMiroTalkCall(userId, userName, isVideo);
+            });
+        });
+
         function setupPeerConnection(targetUserId) {
             peerConnection.onicecandidate = event => {
                 if (event.candidate) {
@@ -787,15 +1005,13 @@
             callAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&size=120`;
             callName.textContent = userName || 'Không xác định';
             callStatus.textContent = 'Cuộc gọi đến...';
-            
             incomingCallButtons.style.display = 'flex';
             activeCallButtons.style.display = 'none';
             callTimer.style.display = 'none';
-            
             callPopup.style.display = 'block';
             callOverlay.style.display = 'block';
-
-            // Thêm sự kiện cho các nút
+            // PHÁT TIẾNG CHUÔNG
+            playAudio('ringingAudio');
             document.getElementById('acceptCallBtn').onclick = acceptCall;
             document.getElementById('rejectCallBtn').onclick = rejectCall;
         }
@@ -893,12 +1109,5 @@
             }
         }
 
-        // Add mic state handling
-        connection.on("ReceiveMicState", (isEnabled) => {
-            const muteIcon = document.getElementById('toggleMicBtn').querySelector('i');
-            if (muteIcon) {
-                muteIcon.className = isEnabled ? 'bi bi-mic-fill' : 'bi bi-mic-mute-fill';
-            }
-        });
     </script>
 }

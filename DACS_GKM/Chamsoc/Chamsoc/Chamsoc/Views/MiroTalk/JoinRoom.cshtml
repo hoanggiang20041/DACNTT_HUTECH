@@ -1,0 +1,247 @@
+@{
+    ViewData["Title"] = "Cuộc gọi MiroTalk P2P";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1c1c1e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #mirotalk-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .mirotalk-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .mirotalk-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .call-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            z-index: 1001;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .end-call-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: #ff4444;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255,68,68,0.3);
+        }
+        
+        .end-call-btn:hover {
+            background: #ff6666;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="mirotalk-container">
+        <div class="mirotalk-loading">
+            <div class="spinner"></div>
+            <div>Đang kết nối MiroTalk P2P...</div>
+        </div>
+        
+        <div class="call-info">
+            <div><strong>Phòng:</strong> @ViewBag.RoomId</div>
+            <div><strong>Loại:</strong> @(ViewBag.IsVideoCall ? "Video Call" : "Audio Call")</div>
+            <div><strong>Người gọi:</strong> @ViewBag.Room.CallerName</div>
+            <div><strong>Người nhận:</strong> @ViewBag.Room.ReceiverName</div>
+        </div>
+        
+        <button class="end-call-btn" onclick="endCall()" title="Kết thúc cuộc gọi">
+            📞
+        </button>
+    </div>
+
+    <script>
+        const roomId = '@ViewBag.RoomId';
+        const currentUserName = '@ViewBag.CurrentUserName';
+        const isVideoCall = @Json.Serialize(ViewBag.IsVideoCall);
+
+        // Initialize MiroTalk P2P with iframe popup
+        function initializeMiroTalk() {
+            try {
+                // Create MiroTalk P2P URL
+                // Thử truyền tham số auto-join nếu MiroTalk hỗ trợ
+                const params = new URLSearchParams({
+                    name: currentUserName,
+                    username: currentUserName,
+                    displayName: currentUserName,
+                    autostart: '1',
+                    autoJoin: '1',
+                    mic: 'on',
+                    video: isVideoCall ? 'on' : 'off'
+                });
+                const mirotalkUrl = `https://p2p.mirotalk.com/join/${roomId}?${params.toString()}`;
+                
+                console.log('Opening MiroTalk P2P in popup:', mirotalkUrl);
+                console.log('Username to auto-fill:', currentUserName);
+                
+                // Hide loading spinner
+                document.querySelector('.mirotalk-loading').style.display = 'none';
+                
+                // Create iframe for MiroTalk
+                const iframe = document.createElement('iframe');
+                iframe.src = mirotalkUrl;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                iframe.style.position = 'absolute';
+                iframe.style.top = '0';
+                iframe.style.left = '0';
+                iframe.style.zIndex = '1';
+                
+                // Add iframe to container
+                const container = document.getElementById('mirotalk-container');
+                container.appendChild(iframe);
+                
+                // Show username info overlay
+                const usernameOverlay = document.createElement('div');
+                usernameOverlay.style.cssText = `
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    z-index: 1002;
+                    font-size: 12px;
+                    backdrop-filter: blur(10px);
+                    max-width: 250px;
+                `;
+                usernameOverlay.innerHTML = `
+                    <div><strong>Tên người dùng:</strong></div>
+                    <div style="margin: 5px 0;">
+                        <input type="text" id="usernameInput" value="${currentUserName}" readonly 
+                               style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); 
+                                      color: white; padding: 3px; border-radius: 3px; width: 150px; font-size: 11px;">
+                        <button onclick="copyUsername()" style="background: #28a745; border: none; color: white; 
+                                padding: 3px 6px; border-radius: 3px; margin-left: 3px; cursor: pointer; font-size: 10px;">
+                            📋
+                        </button>
+                    </div>
+                    <div style="font-size: 10px; opacity: 0.8;">
+                        Copy tên và paste vào MiroTalk
+                    </div>
+                `;
+                
+                container.appendChild(usernameOverlay);
+                
+                console.log('MiroTalk P2P popup initialized successfully');
+                
+            } catch (error) {
+                console.error('Error initializing MiroTalk P2P popup:', error);
+                alert('Không thể khởi tạo MiroTalk P2P: ' + error.message);
+                window.close();
+            }
+        }
+
+        // Copy username to clipboard
+        function copyUsername() {
+            const usernameInput = document.getElementById('usernameInput');
+            usernameInput.select();
+            usernameInput.setSelectionRange(0, 99999); // For mobile devices
+            
+            try {
+                document.execCommand('copy');
+                alert('Đã sao chép tên người dùng!');
+            } catch (err) {
+                // Fallback for modern browsers
+                navigator.clipboard.writeText(currentUserName).then(() => {
+                    alert('Đã sao chép tên người dùng!');
+                }).catch(() => {
+                    alert('Không thể sao chép. Vui lòng copy thủ công.');
+                });
+            }
+        }
+
+        // End call
+        function endCall() {
+            try {
+                // Call API to end room
+                fetch('/MiroTalk/EndRoom', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ RoomId: roomId })
+                }).catch(error => {
+                    console.error('Error ending room:', error);
+                });
+                
+                // Close window
+                window.close();
+                
+            } catch (error) {
+                console.error('Error ending call:', error);
+                window.close();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing MiroTalk P2P call...');
+            initializeMiroTalk();
+        });
+
+        // Nhận tín hiệu đóng từ trang cha
+        window.addEventListener('message', function(ev) {
+            if (ev && ev.data === 'end-call') {
+                endCall();
+            }
+        });
+    </script>
+</body>
+</html>
