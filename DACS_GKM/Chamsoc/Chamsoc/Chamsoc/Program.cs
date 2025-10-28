@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Chamsoc.Hubs;
 using Chamsoc.Services;
 using Microsoft.Extensions.Logging;
+using Chamsoc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpClient<OpenRouterService>();
 builder.Services.AddScoped<OpenRouterService>();
+builder.Services.AddSingleton<Chamsoc.Services.EmailService>();
+
+// Thêm Jitsi Meet Service
+builder.Services.AddSingleton<JitsiMeetService>();
+
+// Thêm MiroTalk P2P Service
+builder.Services.AddSingleton<MiroTalkMeetService>();
 
 // Thêm SignalR
 builder.Services.AddSignalR();
@@ -104,6 +112,28 @@ builder.Services.AddLogging(logging =>
 });
 
 var app = builder.Build();
+
+// Thiết lập database trước khi chạy ứng dụng
+try
+{
+    var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        app.Logger.LogInformation("Setting up database...");
+        DatabaseSetup.SetupDatabase(connectionString);
+        
+        app.Logger.LogInformation("Testing database connection...");
+        if (DatabaseSetup.TestConnection(connectionString))
+        {
+            app.Logger.LogInformation("Database connection successful!");
+        }
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "Database setup failed. Please check MySQL is running and credentials are correct.");
+    app.Logger.LogError("You may need to manually run the SQL commands from fix_mysql.sql file");
+}
 
 // Tạo tài khoản Admin và vai trò
 using (var scope = app.Services.CreateScope())
@@ -189,6 +219,26 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+// Cho phép quyền thiết bị trong iframe cùng nguồn (Permissions-Policy)
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Permissions-Policy"] = string.Join(
+        ", ",
+        new[]
+        {
+            "camera=*",
+            "microphone=*",
+            "fullscreen=*",
+            "autoplay=*",
+            "display-capture=*",
+            "encrypted-media=*",
+            "accelerometer=*",
+            "gyroscope=*",
+            "clipboard-write=*"
+        }
+    );
+    await next();
+});
 app.UseRouting();
 
 // Áp dụng CORS trước authentication và authorization

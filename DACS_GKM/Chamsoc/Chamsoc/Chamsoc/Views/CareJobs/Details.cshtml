@@ -241,9 +241,55 @@
                         <i class="fas fa-edit me-2"></i>Chỉnh sửa
                     </a>
                 }
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reminderModal">
+                    <i class="bi bi-calendar-event me-2"></i>Nhắc lịch
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Reminder Modal -->
+<div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reminderModalLabel"><i class="bi bi-bell me-2"></i>Tạo nhắc lịch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form asp-action="SendReminder" method="post" enctype="multipart/form-data">
+        <div class="modal-body">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <div class="mb-3">
+                <label class="form-label">Ngày giờ nhắc</label>
+                <input type="datetime-local" name="reminderTime" class="form-control" value="@DateTime.Now.AddDays(7).ToString("yyyy-MM-ddTHH:mm")" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tiêu đề</label>
+                <input type="text" name="subject" class="form-control" placeholder="[GKM Care] Nhắc lịch tái khám" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Lời nhắn</label>
+                <textarea name="message" class="form-control" rows="4" placeholder="Xin chào @Model.SeniorName, GKM Care xin nhắc lịch tái khám vào ..."></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Chọn tệp ảnh (tùy chọn)</label>
+                <input type="file" name="imageFile" accept="image/*" class="form-control" />
+                <div class="form-text">Ảnh sẽ được tải lên và hiển thị trực tiếp trong email.</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Link đính kèm (tùy chọn)</label>
+                <input type="url" name="linkUrl" class="form-control" placeholder="https://..." />
+                <div class="form-text">Link sẽ hiển thị trong email với nút “Xem chi tiết”.</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-send me-2"></i>Gửi nhắc lịch</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <style>

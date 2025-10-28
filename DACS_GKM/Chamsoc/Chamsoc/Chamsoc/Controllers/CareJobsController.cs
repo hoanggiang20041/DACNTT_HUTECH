@@ -20,11 +20,14 @@ namespace Chamsoc.Controllers
         private readonly IHubContext<NotificationHub> _notificationHub;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public CareJobsController(AppDbContext context, IHubContext<NotificationHub> notificationHub, IWebHostEnvironment webHostEnvironment)
+        private readonly Chamsoc.Services.EmailService _emailService;
+
+        public CareJobsController(AppDbContext context, IHubContext<NotificationHub> notificationHub, IWebHostEnvironment webHostEnvironment, Chamsoc.Services.EmailService emailService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _notificationHub = notificationHub ?? throw new ArgumentNullException(nameof(notificationHub));
             _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         public async Task<IActionResult> Index()
@@ -552,7 +555,20 @@ namespace Chamsoc.Controllers
                 Console.WriteLine($"Senior Status: {updatedJob.Senior?.Status}");
 
                 await SendStatusUpdateNotification(job, userRole);
-                TempData["SuccessMessage"] = "Hoàn thành công việc thành công.";
+                // Gửi email nhắc lịch cho Senior (dùng thời gian mặc định: 7 ngày sau EndTime)
+                if (updatedJob?.Senior?.User?.Email != null)
+                {
+                    var nextTime = (updatedJob.EndTime ?? DateTime.Now).AddDays(7);
+                    var subject = $"[GKM Care] Nhắc lịch tái khám - Công việc #{updatedJob.Id}";
+                    var body = $@"<p>Chào {updatedJob.SeniorName},</p>
+                                   <p>Bác sĩ/Người chăm sóc đề xuất nhắc lịch tái khám.</p>
+                                   <p><strong>Thời gian đề xuất:</strong> {nextTime:dd/MM/yyyy HH:mm}</p>
+                                   <p><strong>Dịch vụ:</strong> {GetServiceTypeNameInternal(updatedJob.ServiceType)}</p>
+                                   <p>Bạn có thể vào trang công việc để đặt lịch phù hợp.</p>
+                                   <p>Trân trọng,<br/>GKM Care</p>";
+                    _ = _emailService.SendEmailAsync(updatedJob.Senior.User.Email, subject, body);
+                }
+                TempData["SuccessMessage"] = "Hoàn thành công việc thành công. Đã gửi nhắc lịch qua email (nếu có).";
             }
             catch (Exception ex)
             {
@@ -1074,5 +1090,133 @@ namespace Chamsoc.Controllers
         }
 
         private IActionResult AccessDenied() => View("~/Views/Shared/AccessDenied.cshtml");
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendReminder(int id, DateTime reminderTime, string subject, string message, IFormFile imageFile, string linkUrl)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userId = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(userRole) || string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login", "Account");
+
+            if (userRole != "Caregiver" && userRole != "Admin")
+                return AccessDenied();
+
+            var job = await _context.CareJobs
+                .Include(j => j.Senior)
+                .ThenInclude(s => s.User)
+                .FirstOrDefaultAsync(j => j.Id == id);
+
+            if (job == null) return NotFound();
+
+            var targetEmail = job.Senior?.User?.Email;
+            if (string.IsNullOrWhiteSpace(targetEmail))
+            {
+                TempData["ErrorMessage"] = "Khách hàng chưa có email, không thể gửi nhắc lịch.";
+                return RedirectToAction("Details", new { id });
+            }
+
+            var safeSubject = string.IsNullOrWhiteSpace(subject) ? $"[GKM Care] Nhắc lịch tái khám - Công việc #{job.Id}" : subject.Trim();
+            var formattedTime = reminderTime.ToString("dd/MM/yyyy HH:mm");
+            var safeMessage = string.IsNullOrWhiteSpace(message)
+                ? $"Xin chào {job.SeniorName},<br/>GKM Care xin nhắc lịch tái khám vào <strong>{formattedTime}</strong>."
+                : message.Replace("\n", "<br/>");
+
+            // Xử lý ảnh tải lên (ưu tiên file tải lên thay vì link)
+            string? savedImageUrl = null;
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                try
+                {
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "reminders");
+                    if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                    var uniqueName = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + "_" + Path.GetFileName(imageFile.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+                    savedImageUrl = "/uploads/reminders/" + uniqueName;
+                }
+                catch { /* ignore and continue without image */ }
+            }
+
+            byte[]? inlineBytes = null;
+            string? inlineType = null;
+            if (!string.IsNullOrWhiteSpace(savedImageUrl))
+            {
+                try
+                {
+                    var physical = Path.Combine(_webHostEnvironment.WebRootPath, savedImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    inlineBytes = await System.IO.File.ReadAllBytesAsync(physical);
+                    inlineType = "image/" + Path.GetExtension(physical).Trim('.');
+                }
+                catch { }
+            }
+
+            var imageHtml = (inlineBytes != null)
+                ? "<div style=\"margin:12px 0\"><img src=\"cid:inlineImage\" alt=\"Reminder\" style=\"max-width:100%;border-radius:8px\"/></div>"
+                : string.Empty;
+
+            var linkHtml = string.IsNullOrWhiteSpace(linkUrl)
+                ? string.Empty
+                : $"<p><a href=\"{linkUrl}\" target=\"_blank\" style=\"color:#0d6efd\">Xem chi tiết</a></p>";
+
+            var body = $@"<div style='font-family:Arial,sans-serif;font-size:14px;color:#222'>
+                            <p>{safeMessage}</p>
+                            <p><strong>Thời gian:</strong> {formattedTime}</p>
+                            <p><strong>Dịch vụ:</strong> {GetServiceTypeNameInternal(job.ServiceType)}</p>
+                            {imageHtml}
+                            {linkHtml}
+                            <p>Trân trọng,<br/>GKM Care</p>
+                          </div>";
+
+            var sent = (inlineBytes != null)
+                ? await _emailService.SendEmailWithInlineImageAsync(targetEmail, safeSubject, body, inlineBytes, inlineType)
+                : await _emailService.SendEmailAsync(targetEmail, safeSubject, body);
+            if (!sent)
+            {
+                TempData["ErrorMessage"] = "Gửi email thất bại. Vui lòng kiểm tra cấu hình SMTP.";
+                return RedirectToAction("Details", new { id });
+            }
+
+            var notification = new Notification
+            {
+                UserId = job.Senior.UserId,
+                JobId = job.Id,
+                Title = "Nhắc lịch tái khám",
+                Message = $"Đã gửi nhắc lịch tái khám vào {formattedTime}",
+                CreatedAt = DateTime.Now,
+                IsRead = false,
+                Type = "Reminder",
+                Link = $"/CareJobs/Details/{job.Id}"
+            };
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+            await _notificationHub.Clients.User(job.Senior.UserId).SendAsync("ReceiveNotification", notification.Message);
+
+            TempData["SuccessMessage"] = "Đã gửi nhắc lịch qua email.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        private static string GetServiceTypeNameInternal(string serviceType)
+        {
+            if (string.IsNullOrWhiteSpace(serviceType)) return "";
+            switch (serviceType.Trim().ToLowerInvariant())
+            {
+                case "comprehensive":
+                    return "Chăm sóc toàn diện";
+                case "physiotherapy":
+                    return "Vật lí trị liệu";
+                case "medical":
+                    return "Chăm sóc y tế";
+                case "rehabilitation":
+                    return "Phục hồi chức năng";
+                default:
+                    return serviceType;
+            }
+        }
     }
 }

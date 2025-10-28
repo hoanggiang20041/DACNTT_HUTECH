@@ -99,6 +99,40 @@
                     <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="@Model.PhoneNumber" required />
                 </div>
                 <div class="mb-3">
+                    <label for="gender" class="form-label">Giới tính</label>
+                    <select class="form-control" id="gender" name="gender" required>
+                        <option value="">Chọn giới tính</option>
+                @if (Model?.Gender == "Nam")
+                {
+                    <option value="Nam" selected>Nam</option>
+                }
+                else
+                {
+                    <option value="Nam">Nam</option>
+                }
+                @if (Model?.Gender == "Nữ")
+                {
+                    <option value="Nữ" selected>Nữ</option>
+                }
+                else
+                {
+                    <option value="Nữ">Nữ</option>
+                }
+                @if (Model?.Gender == "Khác")
+                {
+                    <option value="Khác" selected>Khác</option>
+                }
+                else
+                {
+                    <option value="Khác">Khác</option>
+                }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Địa chỉ</label>
+                    <textarea class="form-control" id="address" name="address" rows="3" required>@(Model?.Address ?? "")</textarea>
+                </div>
+                <div class="mb-3">
                     <label for="currentPassword" class="form-label">Mật khẩu hiện tại (để đổi mật khẩu)</label>
                     <input type="password" class="form-control" id="currentPassword" name="currentPassword" />
                 </div>

@@ -81,7 +81,7 @@ namespace Chamsoc.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin,Senior,Caregiver")]
-        public async Task<IActionResult> UpdateProfileSenior(string id, string name, int age, string careNeeds, bool status, string email, string contact, string currentPassword, string newPassword, IFormFile avatar, decimal price, IFormFileCollection identityAndHealthDocs)
+        public async Task<IActionResult> UpdateProfileSenior(string id, string name, int age, string gender, string address, string careNeeds, bool status, string email, string contact, string currentPassword, string newPassword, IFormFile avatar, decimal price, IFormFileCollection identityAndHealthDocs)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null || user.Role != "Senior")
@@ -282,8 +282,13 @@ namespace Chamsoc.Controllers
                 seniorToUpdate.Price = price;
             }
 
+            // Cập nhật địa chỉ và giới tính cho user
+            user.Address = address;
+            user.Gender = gender;
+
             try
             {
+                await _userManager.UpdateAsync(user);
                 _context.Seniors.Update(seniorToUpdate);
                 await _context.SaveChangesAsync();
             }
@@ -464,7 +469,7 @@ namespace Chamsoc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string username, string email, string phoneNumber, string password, string role, string name, int age, string careNeeds, bool status, string skills, bool isAvailable, IFormFile certificate, IFormFileCollection identityAndHealthDocs, decimal price, string gender)
+        public async Task<IActionResult> Register(string username, string email, string phoneNumber, string password, string role, string name, int age, string careNeeds, bool status, string skills, bool isAvailable, IFormFile certificate, IFormFileCollection identityAndHealthDocs, decimal price, string gender, string address)
         {
             try
             {
@@ -555,7 +560,7 @@ namespace Chamsoc.Controllers
                     IsLocked = false,
                     Balance = 0,
                     FullName = name,
-                    Address = "Chưa cập nhật",
+                    Address = string.IsNullOrWhiteSpace(address) ? "Chưa cập nhật" : address,
                     DateOfBirth = new DateTime(1990, 1, 1),
                     Gender = string.IsNullOrWhiteSpace(gender) ? "Chưa cập nhật" : gender,
                     IsActive = true,
@@ -691,7 +696,7 @@ namespace Chamsoc.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin,Caregiver")]
-        public async Task<IActionResult> UpdateProfileCaregiver(string id, string name, string skills, string email, string contact, bool isAvailable, string currentPassword, string newPassword, IFormFile avatar, decimal price, IFormFile certificate, IFormFile degree)
+        public async Task<IActionResult> UpdateProfileCaregiver(string id, string name, string skills, string email, string contact, string gender, string address, bool isAvailable, string currentPassword, string newPassword, IFormFile avatar, decimal price, IFormFile certificate, IFormFile degree)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null || user.Role != "Caregiver")
@@ -778,6 +783,10 @@ namespace Chamsoc.Controllers
             caregiverToUpdate.Contact = contact;
             caregiverToUpdate.IsAvailable = isAvailable;
             caregiverToUpdate.Price = price;
+
+            // Cập nhật địa chỉ và giới tính cho user
+            user.Address = address;
+            user.Gender = gender;
 
             // Tạo pricing dựa trên giá người dùng nhập
             var pricingObj = new

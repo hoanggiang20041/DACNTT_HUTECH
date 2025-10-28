@@ -241,7 +241,7 @@ namespace Chamsoc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfileAdmin(string id, string email, string phoneNumber, string currentPassword, string newPassword)
+        public async Task<IActionResult> UpdateProfileAdmin(string id, string email, string phoneNumber, string gender, string address, string currentPassword, string newPassword)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null || user.Role != "Admin")
@@ -289,6 +289,10 @@ namespace Chamsoc.Controllers
                 }
                 user.PhoneNumber = phoneNumber;
             }
+
+            // Cập nhật địa chỉ và giới tính
+            user.Address = address;
+            user.Gender = gender;
 
             await _userManager.UpdateAsync(user);
 
