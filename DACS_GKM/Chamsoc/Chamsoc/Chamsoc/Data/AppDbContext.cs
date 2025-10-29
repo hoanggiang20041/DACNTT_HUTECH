@@ -45,6 +45,12 @@ namespace Chamsoc.Data
             builder.Entity<Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>>().ToTable("role_claims");
             builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<string>>().ToTable("user_tokens");
 
+            // Configure ApplicationUser RoleId length and nullability
+            builder.Entity<ApplicationUser>()
+                .Property(u => u.RoleId)
+                .HasMaxLength(36)
+                .IsRequired(false);
+
             // Configure relationships
             builder.Entity<CareJob>()
                 .HasOne(j => j.Senior)
@@ -108,7 +114,7 @@ namespace Chamsoc.Data
 
             builder.Entity<Notification>()
                 .HasOne(n => n.Job)
-                .WithMany()
+                .WithMany(j => j.Notifications)
                 .HasForeignKey(n => n.JobId)
                 .OnDelete(DeleteBehavior.Restrict);
 

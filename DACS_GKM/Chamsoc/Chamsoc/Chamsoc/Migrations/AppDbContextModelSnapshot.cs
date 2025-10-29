@@ -101,8 +101,8 @@ namespace Chamsoc.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
@@ -126,7 +126,7 @@ namespace Chamsoc.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.CareJob", b =>
@@ -262,7 +262,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("CareJobs");
+                    b.ToTable("care_jobs", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Caregiver", b =>
@@ -343,7 +343,7 @@ namespace Chamsoc.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Caregivers");
+                    b.ToTable("caregivers", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Complaint", b =>
@@ -391,7 +391,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("SeniorId");
 
-                    b.ToTable("Complaints");
+                    b.ToTable("complaints", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Notification", b =>
@@ -401,9 +401,6 @@ namespace Chamsoc.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CareJobId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -435,13 +432,11 @@ namespace Chamsoc.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CareJobId");
-
                     b.HasIndex("JobId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("notifications", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Payment", b =>
@@ -459,7 +454,6 @@ namespace Chamsoc.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ApprovedBy")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("CaregiverId")
@@ -472,22 +466,18 @@ namespace Chamsoc.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("PaymentMethod")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("RejectedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("RejectedBy")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("RejectionReason")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("SeniorId")
@@ -498,7 +488,6 @@ namespace Chamsoc.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("TransactionId")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -509,7 +498,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("SeniorId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("payments", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Rating", b =>
@@ -551,7 +540,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("SeniorId");
 
-                    b.ToTable("Ratings");
+                    b.ToTable("ratings", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Senior", b =>
@@ -603,7 +592,7 @@ namespace Chamsoc.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Seniors");
+                    b.ToTable("seniors", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Service", b =>
@@ -638,7 +627,7 @@ namespace Chamsoc.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Services");
+                    b.ToTable("services", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.Transaction", b =>
@@ -687,7 +676,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("SeniorId");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("transactions", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -713,7 +702,7 @@ namespace Chamsoc.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -738,7 +727,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims", (string)null);
+                    b.ToTable("role_claims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -763,7 +752,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
+                    b.ToTable("user_claims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -785,7 +774,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
+                    b.ToTable("user_logins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -800,7 +789,7 @@ namespace Chamsoc.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
+                    b.ToTable("user_roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -819,7 +808,7 @@ namespace Chamsoc.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("user_tokens", (string)null);
                 });
 
             modelBuilder.Entity("Chamsoc.Models.CareJob", b =>
@@ -888,12 +877,8 @@ namespace Chamsoc.Migrations
 
             modelBuilder.Entity("Chamsoc.Models.Notification", b =>
                 {
-                    b.HasOne("Chamsoc.Models.CareJob", null)
-                        .WithMany("Notifications")
-                        .HasForeignKey("CareJobId");
-
                     b.HasOne("Chamsoc.Models.CareJob", "Job")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("JobId")
                         .OnDelete(DeleteBehavior.Restrict);
 
