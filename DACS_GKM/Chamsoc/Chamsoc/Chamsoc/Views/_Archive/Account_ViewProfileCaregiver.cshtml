@@ -1,0 +1,22 @@
+@* Archived duplicate of Views/Account/ViewProfileCaregiver.cshtml *@
+@model Chamsoc.Models.CaregiverViewModel
+@{
+    ViewData["Title"] = "Trang cá nhân người cần chăm sóc";
+    string currentUserRole = ViewBag.CurrentUserRole;
+}
+<div class="profile-container">
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2>Trang cá nhân người chăm sóc</h2>
+            </div>
+            <div class="avatar-wrapper">
+                <div class="avatar-container">
+                    @if (!string.IsNullOrEmpty(Model.AvatarUrl)) { <img src="@Model.AvatarUrl" alt="Avatar" class="profile-avatar" /> } else { <img src="https://via.placeholder.com/140" alt="Avatar mặc định" class="profile-avatar" /> }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

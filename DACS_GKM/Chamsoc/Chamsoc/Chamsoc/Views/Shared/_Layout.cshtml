@@ -8,6 +8,9 @@
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Roboto:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
@@ -22,7 +25,7 @@
             opacity: 0;
             animation: fadeIn 1.5s ease-in-out forwards;
             margin-bottom: 2rem;
-            margin-top: 20px; /* Khoảng cách cho navbar cố định (giảm từ 30px) */
+            margin-top: -70px; /* Bù lại padding-top của body để banner sát navbar */
         }
 
         .banner img {
@@ -33,35 +36,46 @@
             filter: brightness(0.7);
         }
 
-        .banner-text {
+        /* Banner Text - Style cao cấp với text-shadow và stroke */
+        .banner-text.no-box {
             position: absolute;
-            top: 50%;
             left: 50%;
+            top: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            width: 80%;
+            width: 90%;
+            max-width: 1200px;
+            z-index: 2;
             opacity: 0;
             animation: slideIn 1s ease-in-out 0.5s forwards;
         }
 
-        .banner-text h1 {
-            font-size: 2.1rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin-bottom: 10px;
+        .banner-text.no-box h1 {
+            font-family: 'Montserrat', 'Roboto', sans-serif;
+            font-weight: 800;
+            font-size: 52px;
+            line-height: 1.25;
+            color: #ffffff;
+            /* Tạo viền chữ trắng nhẹ để nổi trên mọi nền */
+            -webkit-text-stroke: 1.5px #0056b3;
+            text-stroke: 1.5px #0056b3;
+            paint-order: stroke fill;
+            /* Bóng đổ mềm */
+            text-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.6),
+                0 8px 30px rgba(0, 0, 0, 0.4);
+            margin: 0 0 16px 0;
         }
 
-        .banner-text p {
-            font-size: 1.25rem;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 5px 15px;
-            border-radius: 5px;
+        .banner-text.no-box .slogan {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 29px;
+            font-weight: 600;
+            font-style: italic;
+            color: #ffffff;
+            -webkit-text-stroke: 0.8px #28a745;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
+            margin: 0;
         }
 
         @@keyframes fadeIn {
@@ -91,6 +105,7 @@
             min-height: 100vh;
             position: relative;
             padding-bottom: 80px;
+            padding-top: 70px; /* Padding-top để tránh navbar fixed che nội dung */
             display: flex;
             flex-direction: column;
         }
@@ -108,18 +123,18 @@
         }
 
         .navbar-brand {
-            font-size: 1 rem;
+            font-size: 1.25rem; /* Sửa syntax error: bỏ khoảng trắng */
             font-weight: bold;
             color: #007bff;
-            padding: 0;
+            padding: 0.3125rem 0; /* Thêm padding vertical để logo không sát mép */
         }
 
         .nav-link {
             color: #333;
-            font-weight: 700;
-            padding: 0;
-            transition: color 0.3s ease;
-            font-size: 0.9 rem;
+            font-weight: 600; /* Giảm từ 700 xuống 600 để không quá đậm */
+            padding: 0.5rem 0.75rem; /* Thêm padding để dễ click và đẹp hơn */
+            transition: color 0.2s ease, background-color 0.2s ease;
+            font-size: 0.95rem; /* Sửa syntax error: bỏ khoảng trắng */
         }
 
             .nav-link:hover {
@@ -128,24 +143,40 @@
 
         .dropdown-menu {
             background-color: #ffffff;
-            border: 1px solid #ddd;
+            border: 1px solid #e9ecef; /* Đổi màu border nhẹ hơn */
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 0.3rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Tăng shadow để nổi bật hơn */
+            padding: 0.5rem 0; /* Tăng padding */
+            z-index: 1050; /* Đảm bảo dropdown nằm trên navbar */
+            min-width: 200px; /* Min-width để dropdown không quá hẹp */
         }
 
         .dropdown-item {
             color: #333;
             font-weight: 500;
-            padding: 0.3rem 1rem;
-            transition: all 0.3s ease;
+            padding: 0.5rem 1rem; /* Tăng padding để dễ click */
+            transition: background-color 0.15s ease, color 0.15s ease;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
         }
 
-            .dropdown-item:hover {
-                background-color: #007bff;
-                color: white;
-            }
+        .dropdown-item:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .dropdown-item:active {
+            background-color: #0056b3; /* Thêm active state */
+            color: white;
+        }
+
+        .dropdown-item .fas,
+        .dropdown-item i {
+            font-size: 1rem; /* Đảm bảo icon đủ lớn */
+            width: 1.25rem; /* Fixed width để icon align đều */
+            text-align: center;
+        }
 
         .hotline-bar {
             background-color: #ff6200;
@@ -318,11 +349,6 @@
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
             border-top: 1px solid #ff6200;
             margin-top: auto;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
         }
 
             .footer h5 {
@@ -378,61 +404,90 @@
             }
 
         .notification-dropdown {
-            max-height: 300px;
+            max-height: 350px; /* Tăng một chút */
             overflow-y: auto;
-            width: 300px;
+            min-width: 280px; /* Min-width thay vì width cố định */
+            max-width: 350px; /* Max-width để responsive */
+            padding: 0.5rem 0;
+        }
+
+        /* Custom scrollbar cho notification dropdown */
+        .notification-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-dropdown::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .notification-dropdown::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .notification-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         .notification-item {
-            padding: 0.5rem;
-            border-bottom: 1px solid #ddd;
-            font-size: 0.9rem;
+            padding: 0.75rem 1rem; /* Tăng padding */
+            border-bottom: 1px solid #e9ecef; /* Đổi màu border nhẹ hơn */
+            font-size: 0.875rem;
+            transition: background-color 0.15s ease;
         }
 
-            .notification-item:last-child {
-                border-bottom: none;
-            }
+        .notification-item:hover {
+            background-color: #f8f9fa; /* Thêm hover effect */
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item p {
+            margin-bottom: 0.25rem; /* Điều chỉnh margin */
+            font-size: 0.875rem;
+            line-height: 1.4;
+            color: #6c757d;
+        }
+
+        .notification-item strong {
+            font-size: 0.8rem;
+            color: #495057;
+        }
 
         .notification-badge {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: -0.25rem; /* Điều chỉnh vị trí để không overflow */
+            right: -0.25rem;
             background-color: #dc3545;
             color: white;
             border-radius: 50%;
-            padding: 0.15rem 0.4rem;
-            font-size: 0.7rem;
-            transform: translate(50%, -50%);
+            padding: 0.15rem 0.35rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            min-width: 1.2rem; /* Đảm bảo badge tròn khi số < 10 */
+            height: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transform: none; /* Bỏ transform để dễ control hơn */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Thêm shadow để nổi bật */
         }
 
         /* Main Content */
-        .container {
+        .main-container {
             padding-top: 2rem;
             padding-bottom: 2rem;
             flex: 1;
-            margin-bottom: 10px; /* Khoảng cách cho footer cố định (giảm từ 80px) */
+            margin-bottom: 10px; /* Khoảng cách cho footer */
         }
 
         main {
             min-height: calc(100vh - 400px);
         }
-
-        .toast {
-            opacity: 1 !important;
-        }
-        .toast-success {
-            background-color: #28a745 !important;
-        }
-        .toast-error {
-            background-color: #dc3545 !important;
-        }
-        .toast-info {
-            background-color: #17a2b8 !important;
-        }
-        .toast-warning {
-            background-color: #ffc107 !important;
-        }
-
 
         #chatbot-container {
             position: fixed;
@@ -541,23 +596,156 @@
 
         /* Điều chỉnh khoảng cách giữa các phần tử trong navbar */
         .navbar .container {
-            padding-top: 0.3rem;
-            padding-bottom: 0.3rem;
+            padding-top: 0.5rem; /* Tăng padding */
+            padding-bottom: 0.5rem;
         }
 
         .navbar .d-flex {
             align-items: center;
+            gap: 0.75rem; /* Thêm gap để spacing đẹp hơn */
         }
 
         /* Điều chỉnh kích thước icon */
-        .navbar .fas {
-            font-size: 0.9rem;
+        .navbar .fas,
+        .navbar i {
+            font-size: 1rem; /* Tăng lên 1rem để dễ nhìn hơn */
         }
 
         /* Điều chỉnh dropdown toggle */
         .dropdown-toggle::after {
-            margin-left: 0.3rem;
-            vertical-align: middle;
+            margin-left: 0.5rem; /* Tăng margin để đẹp hơn */
+            vertical-align: 0.255em; /* Bootstrap chuẩn */
+        }
+
+        /* Đảm bảo nav-item có position relative cho badge */
+        .navbar .nav-item.position-relative {
+            position: relative;
+        }
+
+        /* Navbar text styling */
+        .navbar-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .navbar-text a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .navbar-text a:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+
+        /* Responsive - Mobile & Tablet */
+        @@media (max-width: 991.98px) {
+            .navbar-nav {
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .nav-link {
+                padding: 0.5rem 1rem; /* Tăng padding trên mobile để dễ click */
+                font-size: 0.95rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.1rem; /* Nhỏ hơn một chút trên mobile */
+            }
+
+            .notification-badge {
+                top: 0.25rem; /* Điều chỉnh vị trí trên mobile */
+                right: 0.25rem;
+                font-size: 0.6rem;
+                min-width: 1.1rem;
+                height: 1.1rem;
+            }
+
+            .navbar-text {
+                font-size: 0.85rem; /* Nhỏ hơn trên mobile */
+                margin-bottom: 0.5rem;
+            }
+
+            .dropdown-menu {
+                min-width: 100%; /* Full width trên mobile */
+                max-width: 100%;
+            }
+
+            .notification-dropdown {
+                min-width: 100%;
+                max-width: 100%;
+            }
+
+            .navbar .d-flex {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .login-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            /* Banner text responsive - Tablet */
+            .banner-text.no-box {
+                width: 95%;
+                padding: 0 1rem;
+            }
+
+            .banner-text.no-box h1 {
+                font-size: 36px;
+                -webkit-text-stroke: 1.2px #0056b3;
+                text-stroke: 1.2px #0056b3;
+                text-shadow: 
+                    0 3px 12px rgba(0, 0, 0, 0.6),
+                    0 6px 24px rgba(0, 0, 0, 0.4);
+            }
+
+            .banner-text.no-box .slogan {
+                font-size: 22px;
+                -webkit-text-stroke: 0.7px #28a745;
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* Responsive - Extra Small */
+        @@media (max-width: 575.98px) {
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.75rem;
+            }
+
+            .navbar-text {
+                font-size: 0.8rem;
+            }
+
+            /* Banner text extra small - Mobile */
+            .banner-text.no-box {
+                width: 98%;
+                padding: 0 0.5rem;
+            }
+
+            .banner-text.no-box h1 {
+                font-size: 28px;
+                line-height: 1.3;
+                -webkit-text-stroke: 1px #0056b3;
+                text-stroke: 1px #0056b3;
+                text-shadow: 
+                    0 2px 10px rgba(0, 0, 0, 0.6),
+                    0 4px 20px rgba(0, 0, 0, 0.4);
+            }
+
+            .banner-text.no-box .slogan {
+                font-size: 18px;
+                -webkit-text-stroke: 0.6px #28a745;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
         }
 
         /* Responsive cho mobile */
@@ -1036,17 +1224,20 @@
         </div>
     </nav>
 
-    <!-- Banner -->
-    <div class="banner">
-        <img src="https://giupviecgiaphu.com/upload/images/dich-vu-cham-soc-nguoi-benh-tai-nha-benh-vien-GIA-PHU.jpg" alt="Banner" />
-        <div class="banner-text">
-            <h1>Dịch Vụ Chăm Sóc Sức Khỏe Toàn Diện Và Vật Lý Trị Liệu 24/7</h1>
-            <p>Sứ mệnh của chúng tôi: "Cuộc sống tốt hơn cho bạn và mọi người"</p>
+    @* Banner chỉ hiển thị nếu view không ẩn *@
+    @if (!IsSectionDefined("HideBanner"))
+    {
+        <div class="banner">
+            <img src="~/Image/Banner/image.jpg" alt="Banner chăm sóc sức khỏe" />
+            <div class="banner-text no-box">
+                <h1>Dịch Vụ Chăm Sóc Sức Khỏe Toàn Diện<br>& Vật Lý Trị Liệu 24/7</h1>
+                <p class="slogan">Sứ mệnh của chúng tôi: "Cuộc sống tốt hơn cho bạn và mọi người"</p>
+            </div>
         </div>
-    </div>
+    }
 
     <!-- Main Content -->
-    <div class="container">
+    <div class="container main-container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -1120,18 +1311,6 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto" id="toastTitle">Thông báo</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body" id="toastMessage">
-            </div>
-        </div>
-    </div>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
@@ -1146,6 +1325,7 @@
     </script>
     <script src="~/js/site.js"></script>
     @RenderSection("Scripts", required: false)
+    @RenderSection("HideBanner", required: false)
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const miniChatWidget = document.getElementById("miniChatWidget");

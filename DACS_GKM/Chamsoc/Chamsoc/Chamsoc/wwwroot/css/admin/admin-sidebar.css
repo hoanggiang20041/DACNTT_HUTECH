@@ -1,0 +1,498 @@
+/* ============================================
+   ADMIN SIDEBAR - MEDICAL-TECH DESIGN 2025
+   Chủ đề: Y tế hiện đại + ấm áp + tin cậy + công nghệ cao cấp
+   ============================================ */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
+
+/* CSS Variables - Medical Tech Color Palette */
+:root {
+    --medical-blue: #007bff;
+    --medical-blue-dark: #0056b3;
+    --medical-blue-light: #0d6efd;
+    --medical-green: #28a745;
+    --medical-green-light: #20c997;
+    --medical-orange: #fd7e14;
+    --medical-orange-light: #ff9f43;
+    --medical-white: #ffffff;
+    --medical-gray-50: #f8f9fa;
+    --medical-gray-100: #e9ecef;
+    --medical-gray-200: #dee2e6;
+    --medical-gray-300: #ced4da;
+    --medical-gray-600: #6c757d;
+    --medical-gray-800: #343a40;
+    --medical-shadow-sm: 0 2px 8px rgba(0, 123, 255, 0.08);
+    --medical-shadow-md: 0 4px 16px rgba(0, 123, 255, 0.12);
+    --medical-shadow-lg: 0 8px 32px rgba(0, 123, 255, 0.16);
+    --medical-blur: blur(20px);
+}
+
+/* Sidebar Container */
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+    backdrop-filter: var(--medical-blur);
+    -webkit-backdrop-filter: var(--medical-blur);
+    box-shadow: var(--medical-shadow-lg);
+    z-index: 1000;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    border-right: 1px solid var(--medical-gray-200);
+}
+
+/* Scrollbar Styling */
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background: var(--medical-gray-300);
+    border-radius: 3px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--medical-gray-600);
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--medical-gray-200);
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-blue-dark) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+}
+
+.sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--medical-white);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar-title i {
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+.sidebar-subtitle {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 0.25rem;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* Toggle Button */
+.sidebar-toggle {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.25rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--medical-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-toggle i {
+    font-size: 1rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Collapsed State */
+#sidebar.collapsed {
+    width: 80px;
+}
+
+#sidebar.collapsed .sidebar-title,
+#sidebar.collapsed .sidebar-subtitle,
+#sidebar.collapsed .menu-title,
+#sidebar.collapsed .sidebar-heading,
+#sidebar.collapsed .nav-link span,
+#sidebar.collapsed .nav-badge {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+#sidebar.collapsed .sidebar-toggle {
+    right: 50%;
+    transform: translateX(50%);
+}
+
+#sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+}
+
+#sidebar.collapsed .nav-link {
+    justify-content: center;
+    padding: 0.875rem 0;
+    margin: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+#sidebar.collapsed .nav-link i {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+#sidebar.collapsed .nav-section {
+    margin-bottom: 1.5rem;
+}
+
+/* Navigation Sections */
+.nav-section {
+    padding: 1rem 0;
+    margin-bottom: 0.5rem;
+}
+
+/* Đảm bảo nav-item và ul.nav không có padding thừa */
+#sidebar .nav-item {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#sidebar ul.nav.flex-column {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.sidebar-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--medical-gray-600);
+    padding: 0.75rem 1.25rem 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: opacity 0.3s ease;
+}
+
+/* Navigation Links - Tăng specificity */
+#sidebar .nav-link,
+#sidebar nav .nav-link {
+    display: flex !important;
+    align-items: center !important; /* Đảm bảo căn giữa theo chiều dọc */
+    justify-content: flex-start !important; /* Căn trái theo chiều ngang */
+    gap: 0.875rem !important; /* Khoảng cách giữa icon và text */
+    padding: 0.875rem 1.25rem !important;
+    margin: 0.25rem 0.75rem;
+    color: var(--medical-gray-800) !important;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    white-space: nowrap;
+    background: transparent !important;
+}
+
+#sidebar .nav-link i,
+#sidebar nav .nav-link i {
+    font-size: 1.125rem;
+    min-width: 24px !important; /* Đảm bảo width cố định */
+    width: 24px !important; /* Width cố định để align đều */
+    height: 24px !important; /* Height cố định */
+    text-align: center;
+    display: flex !important; /* Dùng flex để căn giữa hoàn hảo */
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.25s ease;
+    color: var(--medical-gray-600);
+    line-height: 1 !important; /* Loại bỏ line-height thừa */
+    flex-shrink: 0; /* Không cho icon bị co lại */
+}
+
+#sidebar .nav-link span,
+#sidebar nav .nav-link span {
+    flex: 1;
+    transition: opacity 0.3s ease;
+    color: inherit;
+}
+
+/* Hover State - Tránh hover khi đang active */
+#sidebar .nav-link:hover:not(.active) {
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.08) 0%, rgba(13, 110, 253, 0.12) 100%) !important;
+    color: var(--medical-blue) !important;
+    transform: translateX(4px);
+    box-shadow: var(--medical-shadow-sm);
+}
+
+#sidebar .nav-link:hover:not(.active) i {
+    color: var(--medical-blue) !important;
+    transform: scale(1.1);
+}
+
+/* Active State - Tăng specificity để override CSS khác */
+#sidebar .nav-link.active,
+#sidebar .nav-link.active:hover {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-blue-light) 100%) !important;
+    color: var(--medical-white) !important;
+    box-shadow: var(--medical-shadow-md) !important;
+    font-weight: 600 !important;
+    transform: none !important;
+    /* Đảm bảo box fill đầy đủ */
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+    width: calc(100% - 1rem) !important;
+    min-height: 44px;
+    border-radius: 12px;
+    /* Đảm bảo flexbox alignment hoàn hảo */
+    display: flex !important;
+    align-items: center !important; /* Căn giữa theo chiều dọc */
+    justify-content: flex-start !important; /* Căn trái theo chiều ngang */
+    gap: 0.875rem !important; /* Khoảng cách giữa icon và text */
+    padding: 0.875rem 1.25rem !important; /* Padding đều */
+}
+
+#sidebar .nav-link.active i,
+#sidebar .nav-link.active:hover i {
+    color: var(--medical-white) !important;
+    transform: none !important;
+    /* Đảm bảo icon căn giữa hoàn hảo */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 24px !important; /* Width cố định để align đều */
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 1.125rem !important;
+    line-height: 1 !important; /* Loại bỏ line-height thừa */
+}
+
+#sidebar .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem; /* Điều chỉnh theo margin-left mới */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: var(--medical-orange);
+    border-radius: 0 4px 4px 0;
+    z-index: 2; /* Tăng z-index để hiển thị trên background */
+}
+
+#sidebar .nav-link.active span,
+#sidebar .nav-link.active:hover span {
+    color: var(--medical-white) !important;
+}
+
+/* Badge Notification */
+.nav-badge {
+    background: linear-gradient(135deg, var(--medical-orange) 0%, var(--medical-orange-light) 100%);
+    color: var(--medical-white);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3);
+    transition: all 0.25s ease;
+}
+
+#sidebar .nav-link:hover:not(.active) .nav-badge {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(253, 126, 20, 0.4);
+}
+
+#sidebar .nav-link.active .nav-badge,
+#sidebar .nav-link.active:hover .nav-badge {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px);
+    color: var(--medical-white) !important;
+}
+
+/* Tooltip for Collapsed State */
+.nav-link[data-tooltip] {
+    position: relative;
+}
+
+#sidebar.collapsed .nav-link[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--medical-gray-800);
+    color: var(--medical-white);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease 0.3s;
+    box-shadow: var(--medical-shadow-md);
+    z-index: 1001;
+}
+
+#sidebar.collapsed .nav-link[data-tooltip]:hover::after {
+    opacity: 1;
+}
+
+#sidebar.collapsed .nav-link[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    left: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: var(--medical-gray-800);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease 0.3s;
+    z-index: 1002;
+}
+
+#sidebar.collapsed .nav-link[data-tooltip]:hover::before {
+    opacity: 1;
+}
+
+/* Main Content Adjustment - Fixed Layout */
+.main-content {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+    transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 100vh;
+    background: var(--medical-gray-50);
+    padding: 1.5rem 2rem;
+    overflow-x: hidden;
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+}
+
+/* Responsive - Tablet */
+@media (max-width: 991.98px) {
+    #sidebar {
+        width: 260px;
+    }
+
+    .main-content {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+        padding: 1.25rem 1.5rem;
+    }
+
+    body.sidebar-collapsed .main-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 767.98px) {
+    #sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        box-shadow: var(--medical-shadow-lg);
+    }
+
+    #sidebar.show {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 1rem 1rem;
+    }
+
+    body.sidebar-collapsed .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Mobile sidebar overlay */
+    #sidebar.show::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: -1;
+    }
+}
+
+/* Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-link {
+    animation: slideIn 0.3s ease backwards;
+}
+
+.nav-link:nth-child(1) { animation-delay: 0.05s; }
+.nav-link:nth-child(2) { animation-delay: 0.1s; }
+.nav-link:nth-child(3) { animation-delay: 0.15s; }
+.nav-link:nth-child(4) { animation-delay: 0.2s; }
+.nav-link:nth-child(5) { animation-delay: 0.25s; }
+
+/* Smooth transitions */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+

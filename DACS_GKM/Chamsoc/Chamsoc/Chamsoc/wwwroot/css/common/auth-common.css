@@ -15,6 +15,41 @@
 .auth-container {
     min-height: 100vh;
     background: linear-gradient(180deg, var(--medical-bg) 0%, #eef5ff 100%);
+    position: relative;
+}
+
+/* Bypass main-container padding khi trong auth-container */
+.auth-container .main-container {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Background pattern cho auth pages */
+.login-background,
+.register-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.medical-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle at 2px 2px, rgba(43, 122, 191, 0.05) 1px, transparent 0);
+    background-size: 40px 40px;
+    opacity: 0.6;
+}
+
+/* Đảm bảo content nằm trên background */
+.auth-container > .container {
+    position: relative;
+    z-index: 1;
 }
 
 .auth-card {
@@ -34,49 +69,48 @@
     border-bottom: 1px solid var(--medical-border);
 }
 
-/* Forms */
-.form-floating { position: relative; margin-bottom: 1.25rem; }
-.form-control, .form-select {
+/* Forms - Placeholder style (không dùng floating label) */
+.auth-container .form-group,
+.auth-container .mb-3,
+.auth-container .required-field {
+    margin-bottom: 1.25rem;
+}
+.auth-container .form-control,
+.auth-container .form-select {
     border: 1px solid var(--medical-border);
     border-radius: 10px;
-    padding: 1.625rem 0.9rem 0.6rem 2.6rem;
-    font-size: 1rem;
+    padding: 0.875rem 1rem; /* Padding chuẩn cho input thông thường */
+    font-size: 1.125rem; /* Font-size lớn để dễ đọc */
     transition: border-color 120ms ease-in-out, box-shadow 120ms ease-in-out;
     background: #ffffff;
-    height: calc(3.5rem + 2px);
+    height: auto; /* Tự động theo nội dung */
+    min-height: 3rem; /* Chiều cao tối thiểu */
+    width: 100%;
 }
-.form-control:focus, .form-select:focus {
+.auth-container .form-control::placeholder {
+    color: var(--medical-muted);
+    opacity: 0.7;
+    font-size: 1.125rem; /* Placeholder cùng font-size với input */
+}
+.auth-container .form-control:focus,
+.auth-container .form-select:focus {
     border-color: var(--medical-primary);
     box-shadow: 0 0 0 0.2rem var(--medical-focus);
     background: #ffffff;
+    outline: none;
 }
-.form-floating > label {
-    position: absolute;
-    height: 100%;
-    padding: 1rem 0 0 0.75rem;
-    pointer-events: none;
-    border: 1px solid transparent;
-    transform-origin: 0 0;
-    transition: all 0.1s ease-in-out;
+.auth-container .form-control:focus::placeholder {
+    opacity: 0; /* Placeholder biến mất khi focus */
+    transition: opacity 120ms ease-in-out;
+}
+/* Select option đầu tiên (placeholder style) */
+.auth-container .form-select option:first-child {
     color: var(--medical-muted);
-    left: 0;
+    opacity: 0.7;
 }
-.form-floating > label::after {
-    content: "";
-    position: absolute;
-    inset: 0.25rem 0 0 0;
-    z-index: -1;
-    height: 0.5em;
-    background: var(--medical-panel);
-    width: 100%;
-}
-.form-control:focus ~ label,
-.form-control:not(:placeholder-shown) ~ label,
-.form-select:focus ~ label,
-.form-select:not([value=""]) ~ label {
-    opacity: 0.65;
-    transform: scale(0.85) translateY(-1rem) translateX(0.15rem);
-    padding: 0;
+.auth-container .form-select:focus option:first-child,
+.auth-container .form-select:not([value=""]) option:first-child {
+    color: #212529; /* Màu bình thường khi đã chọn */
 }
 
 /* Input group with icon */
@@ -143,22 +177,55 @@
     box-shadow: 0 0 0 0.2rem rgba(43, 122, 191, 0.25);
 }
 
-/* Buttons (compatible with Bootstrap btn classes) */
-.btn-primary,
-.medical-btn-primary { background: var(--medical-primary); border: 1px solid var(--medical-primary); border-radius: 10px; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 1rem; transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease; }
-.btn-primary:hover,
-.medical-btn-primary:hover { background: var(--medical-primary-600); border-color: var(--medical-primary-600); transform: translateY(-1px); }
-.btn-secondary { background: #90a4b8; border: 1px solid #90a4b8; border-radius: 10px; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 1rem; }
-.btn-secondary:hover { background: #7f93a7; border-color: #7f93a7; }
+/* Buttons (scoped cho auth pages để tránh override toàn cục) */
+.auth-container .btn-primary,
+.medical-btn-primary {
+    background: var(--medical-primary);
+    border: 1px solid var(--medical-primary);
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+.auth-container .btn-primary:hover,
+.medical-btn-primary:hover {
+    background: var(--medical-primary-600);
+    border-color: var(--medical-primary-600);
+    transform: translateY(-1px);
+}
+.auth-container .btn-secondary {
+    background: #90a4b8;
+    border: 1px solid #90a4b8;
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+}
+.auth-container .btn-secondary:hover {
+    background: #7f93a7;
+    border-color: #7f93a7;
+}
 
 /* Alerts */
 .alert { border-radius: 10px; border: 1px solid transparent; }
 .alert-danger { background: #fde8ea; color: #7c1c24; border-color: #facbd0; }
 .alert-success { background: #e9f7ee; color: #185c2f; border-color: #cfeeda; }
 
-/* Utility */
-.text-primary { color: var(--medical-primary) !important; }
-.text-muted { color: var(--medical-muted) !important; }
+/* Utility - Scope vào auth-container để tránh override toàn cục */
+.auth-container .text-primary { color: var(--medical-primary); }
+.auth-container .text-muted { color: var(--medical-muted); }
+
+/* Medical link style */
+.medical-link {
+    color: var(--medical-primary);
+    text-decoration: none;
+    transition: color 120ms ease;
+}
+.medical-link:hover {
+    color: var(--medical-primary-600);
+    text-decoration: underline;
+}
 
 /* Animations and media queries */
 @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }

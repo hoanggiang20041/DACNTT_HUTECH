@@ -1,5 +1,6 @@
 /* Page-specific tweaks for Register */
 .role-section-hint { font-size: 0.9rem; color: var(--medical-muted); }
+.register-icon { color: var(--medical-primary); font-size: 2.25rem; }
 
 
 
