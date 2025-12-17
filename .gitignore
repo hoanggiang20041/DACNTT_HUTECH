@@ -21,14 +21,5 @@ Thumbs.db
 logs/
 *.log
 
-# Secrets and environment files
-**/appsettings.json
-**/appsettings.*.local.json
-**/appsettings.Development.json.user
-
-# Uploads and generated assets
-**/wwwroot/uploads/
-
 # Node/yarn if any
 node_modules/
-
