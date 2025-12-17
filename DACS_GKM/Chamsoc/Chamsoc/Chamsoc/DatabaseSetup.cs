@@ -12,7 +12,7 @@ namespace Chamsoc
                 var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
                 optionsBuilder.UseMySql(
                     connectionString,
-                    new MariaDbServerVersion(new Version(10, 4, 0))
+                    new MySqlServerVersion(new Version(8, 0, 44))
                 );
 
                 using var context = new AppDbContext(optionsBuilder.Options);
@@ -43,7 +43,7 @@ namespace Chamsoc
                 var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
                 optionsBuilder.UseMySql(
                     connectionString,
-                    new MariaDbServerVersion(new Version(10, 4, 0))
+                    new MySqlServerVersion(new Version(8, 0, 44))
                 );
 
                 using var context = new AppDbContext(optionsBuilder.Options);

@@ -57,7 +57,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MariaDbServerVersion(new Version(10, 4, 0)),
+        new MySqlServerVersion(new Version(8, 0, 44)),
         mySqlOptionsAction: mySqlOptions =>
         {
             mySqlOptions.EnableRetryOnFailure(

@@ -241,9 +241,12 @@
                         <i class="fas fa-edit me-2"></i>Chỉnh sửa
                     </a>
                 }
-                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reminderModal">
-                    <i class="bi bi-calendar-event me-2"></i>Nhắc lịch
-                </button>
+                @if (userRole == "Caregiver" || userRole == "Admin")
+                {
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reminderModal">
+                        <i class="bi bi-calendar-event me-2"></i>Nhắc lịch
+                    </button>
+                }
             </div>
         </div>
     </div>
@@ -266,20 +269,23 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Tiêu đề</label>
-                <input type="text" name="subject" class="form-control" placeholder="[GKM Care] Nhắc lịch tái khám" />
+                <input type="text" id="reminderSubject" name="subject" class="form-control" value="[GKM Care] Nhắc lịch tái khám - Công việc #@Model.Id" placeholder="[GKM Care] Nhắc lịch tái khám" />
             </div>
             <div class="mb-3">
                 <label class="form-label">Lời nhắn</label>
-                <textarea name="message" class="form-control" rows="4" placeholder="Xin chào @Model.SeniorName, GKM Care xin nhắc lịch tái khám vào ..."></textarea>
+                <textarea id="reminderMessage" name="message" class="form-control" rows="4">Xin chào @Model.SeniorName,
+GKM Care xin nhắc lịch tái khám vào @DateTime.Now.AddDays(7).ToString("dd/MM/yyyy HH:mm").
+Dịch vụ: @GetServiceTypeName(Model.ServiceType).
+Vui lòng xem chi tiết dưới đây và xác nhận lịch.</textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Chọn tệp ảnh (tùy chọn)</label>
                 <input type="file" name="imageFile" accept="image/*" class="form-control" />
-                <div class="form-text">Ảnh sẽ được tải lên và hiển thị trực tiếp trong email.</div>
+                <div class="form-text">Nếu không chọn ảnh, hệ thống sẽ tự chèn logo GKM Care vào email.</div>
             </div>
             <div class="mb-3">
                 <label class="form-label">Link đính kèm (tùy chọn)</label>
-                <input type="url" name="linkUrl" class="form-control" placeholder="https://..." />
+                <input type="url" name="linkUrl" class="form-control" value="@Url.Action("Details", "CareJobs", new { id = Model.Id }, Context.Request.Scheme)" placeholder="https://..." />
                 <div class="form-text">Link sẽ hiển thị trong email với nút “Xem chi tiết”.</div>
             </div>
         </div>
@@ -512,4 +518,30 @@
             text-overflow: ellipsis;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const timeInput = document.querySelector('#reminderModal input[name="reminderTime"]');
+            const messageInput = document.getElementById('reminderMessage');
+            const seniorName = '@Model.SeniorName'.trim();
+            const serviceName = '@GetServiceTypeName(Model.ServiceType)'.trim();
+
+            function formatVN(datetimeLocal) {
+                const d = new Date(datetimeLocal);
+                if (isNaN(d)) return datetimeLocal;
+                const pad = n => String(n).padStart(2, '0');
+                return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            }
+
+            function applyTemplate() {
+                if (!timeInput || !messageInput) return;
+                const when = formatVN(timeInput.value);
+                messageInput.value = `Xin chào ${seniorName},\nGKM Care xin nhắc lịch tái khám vào ${when}.\nDịch vụ: ${serviceName}.\nVui lòng xem chi tiết dưới đây và xác nhận lịch.`;
+            }
+
+            if (timeInput && messageInput) {
+                timeInput.addEventListener('change', applyTemplate);
+                timeInput.addEventListener('input', applyTemplate);
+            }
+        });
+    </script>
 } 

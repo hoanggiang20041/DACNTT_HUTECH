@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace Chamsoc.Controllers
 {
@@ -21,13 +22,15 @@ namespace Chamsoc.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         private readonly Chamsoc.Services.EmailService _emailService;
+        private readonly IConfiguration _config;
 
-        public CareJobsController(AppDbContext context, IHubContext<NotificationHub> notificationHub, IWebHostEnvironment webHostEnvironment, Chamsoc.Services.EmailService emailService)
+        public CareJobsController(AppDbContext context, IHubContext<NotificationHub> notificationHub, IWebHostEnvironment webHostEnvironment, Chamsoc.Services.EmailService emailService, IConfiguration config)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _notificationHub = notificationHub ?? throw new ArgumentNullException(nameof(notificationHub));
             _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         public async Task<IActionResult> Index()
@@ -1141,6 +1144,12 @@ namespace Chamsoc.Controllers
                     savedImageUrl = "/uploads/reminders/" + uniqueName;
                 }
                 catch { /* ignore and continue without image */ }
+            }
+
+            // Fallback: use default brand logo if no image uploaded
+            if (string.IsNullOrWhiteSpace(savedImageUrl))
+            {
+                savedImageUrl = _config["Brand:DefaultReminderImagePath"] ?? "/Image/Banner/image.jpg";
             }
 
             byte[]? inlineBytes = null;

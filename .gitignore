@@ -1,0 +1,34 @@
+# Visual Studio / .NET
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userprefs
+*.csproj.user
+*.cache
+
+# Rider / VSCode
+.idea/
+*.iml
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Secrets and environment files
+**/appsettings.json
+**/appsettings.*.local.json
+**/appsettings.Development.json.user
+
+# Uploads and generated assets
+**/wwwroot/uploads/
+
+# Node/yarn if any
+node_modules/
+
